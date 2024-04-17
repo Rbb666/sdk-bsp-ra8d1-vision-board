@@ -95,7 +95,6 @@ void NORETURN __fatal_error(const char *msg)
     }
 }
 
-__attribute__((section(".itcm_data"))) 
 static void omv_entry(void *parameter)
 {
     (void) parameter;
@@ -104,10 +103,10 @@ static void omv_entry(void *parameter)
 
     bool first_soft_reset = true;
 
-#ifdef __DCACHE_PRESENT
-    /* Clean and enable cache */
-    SCB_CleanDCache();
-#endif
+    /* USB Init */
+    extern int tusb_board_init(void);
+    tusb_board_init();
+
 #ifdef RT_USING_FAL
     fal_init();
 #endif
@@ -147,10 +146,11 @@ soft_reset:
     readline_init0();
     imlib_init_all();
 
-    usb_cdc_init();
     usbdbg_init();
     file_buffer_init0();
     sensor_init0();
+    
+    usb_cdc_init();
 
 #if MICROPY_PY_SENSOR
     if (sensor_init() != 0 && first_soft_reset)
