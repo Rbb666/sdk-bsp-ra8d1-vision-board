@@ -17,16 +17,20 @@
 #include <rtthread.h>
 
 #if MICROPY_ENABLE_COMPILER
-void do_str(const char *src, mp_parse_input_kind_t input_kind) {
+void do_str(const char *src, mp_parse_input_kind_t input_kind)
+{
     nlr_buf_t nlr;
-    if (nlr_push(&nlr) == 0) {
+    if (nlr_push(&nlr) == 0)
+    {
         mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
         qstr source_name = lex->source_name;
         mp_parse_tree_t parse_tree = mp_parse(lex, input_kind);
         mp_obj_t module_fun = mp_compile(&parse_tree, source_name, true);
         mp_call_function_0(module_fun);
         nlr_pop();
-    } else {
+    }
+    else
+    {
         // uncaught exception
         mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);
     }
@@ -35,33 +39,35 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 
 static char *stack_top;
 #if MICROPY_ENABLE_GC
-static char heap[4096];
+    static char heap[4096];
 #endif
 
-int mpy_main() {
+int mpy_main()
+{
     int stack_dummy;
     stack_top = (char *)&stack_dummy;
 
 #if MICROPY_ENABLE_GC
     gc_init(heap, heap + sizeof(heap));
 #endif
-	mp_getchar_init();
-	mp_putsn_init();
+    mp_getchar_init();
+    mp_putsn_init();
 
     mp_init();
 
-	pyexec_friendly_repl();
+    pyexec_friendly_repl();
 
     mp_deinit();
 
-	mp_putsn_deinit();
+    mp_putsn_deinit();
     mp_getchar_deinit();
 
     return 0;
 }
 
 #if MICROPY_ENABLE_GC
-void gc_collect(void) {
+void gc_collect(void)
+{
     // WARNING: This gc_collect implementation doesn't try to get root
     // pointers from CPU registers, and thus may function incorrectly.
     void *dummy;
@@ -72,22 +78,27 @@ void gc_collect(void) {
 }
 #endif
 
-mp_lexer_t *mp_lexer_new_from_file(qstr filename) {
+mp_lexer_t *mp_lexer_new_from_file(qstr filename)
+{
     mp_raise_OSError(MP_ENOENT);
 }
 
-mp_import_stat_t mp_import_stat(const char *path) {
+mp_import_stat_t mp_import_stat(const char *path)
+{
     return MP_IMPORT_STAT_NO_EXIST;
 }
 
-void nlr_jump_fail(void *val) {
-	mp_printf(MICROPY_ERROR_PRINTER, "nlr_jump_fail\n");
+void nlr_jump_fail(void *val)
+{
+    mp_printf(MICROPY_ERROR_PRINTER, "nlr_jump_fail\n");
     mp_obj_print_exception(&mp_plat_print, MP_OBJ_FROM_PTR(val));
     while (1);
 }
 
-void NORETURN __fatal_error(const char *msg) {
-    while (1) {
+void NORETURN __fatal_error(const char *msg)
+{
+    while (1)
+    {
         ;
     }
 }
@@ -109,7 +120,8 @@ int DEBUG_printf(const char *format, ...)
 
 #if defined(RT_USING_FINSH) && defined(FINSH_USING_MSH)
 #include <finsh.h>
-static void python(uint8_t argc, char **argv) {
+static void python(uint8_t argc, char **argv)
+{
     mpy_main();
 }
 MSH_CMD_EXPORT(python, MicroPython: `python [file.py]` execute python script);

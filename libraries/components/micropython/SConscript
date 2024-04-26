@@ -7,13 +7,27 @@ group = []
 cwd     = GetCurrentDir()
 # The set of source files associated with this SConscript file.
 src     = Glob('py/*.c')
-src     += Glob('shared/runtime/*.c')
-src     += Glob('shared/runtime/gchelper_thumb2.s')
-src     += Glob('shared/readline/*.c')
-src     += Glob('extmod/moductypes.c')
-# src    += Glob('lib/netutils/*.c')
-# src    += Glob('lib/timeutils/*.c')
-# src    += Glob('drivers/bus/*.c')
+
+share_src   = Glob('shared/runtime/*.c')
+share_src   += Glob('shared/runtime/gchelper_thumb2.s')
+share_src   += Glob('shared/readline/*.c')
+
+extmod_src  = Glob('extmod/moductypes.c')
+extmod_src  += Glob('extmod/modbinascii.c')
+extmod_src  += Glob('extmod/modcryptolib.c')
+extmod_src  += Glob('extmod/modheapq.c')
+extmod_src  += Glob('extmod/modhashlib.c')
+extmod_src  += Glob('extmod/modtime.c')
+extmod_src  += Glob('extmod/modjson.c')
+extmod_src  += Glob('extmod/modos.c')
+extmod_src  += Glob('extmod/modplatform.c')
+extmod_src  += Glob('extmod/modrandom.c')
+extmod_src  += Glob('extmod/modre.c')
+extmod_src  += Glob('extmod/modselect.c')
+extmod_src  += Glob('extmod/modasyncio.c')
+extmod_src  += Glob('extmod/moddeflate.c')
+
+lib_src  = Glob('lib/uzlib/*.c')
 
 # modules_src  = Glob('port/*.c')
 # modules_src  += Glob('port/native/*.c')
@@ -24,16 +38,18 @@ src     += Glob('extmod/moductypes.c')
 # machine_src = Glob('port/modules/machine/*.c')
 
 # SrcRemove(src, ['shared/runtime/sys_stdio_mphal.c'])
-SrcRemove(src, ['shared/runtime/gchelper_generic.c'])
-SrcRemove(src, ['shared/runtime/softtimer.c'])
-SrcRemove(src, ['py/modthread.c'])
 # SrcRemove(src, ['lib/libm_dbl/sqrt.c'])
+SrcRemove(share_src, ['shared/runtime/gchelper_generic.c'])
+SrcRemove(share_src, ['shared/runtime/softtimer.c'])
+SrcRemove(lib_src, ['lib/uzlib/defl_static.c'])
+SrcRemove(src, ['py/modthread.c'])
 
 path    = [cwd]
 path   += [cwd + '/py']
 path   += [cwd + '/shared/runtime']
 path   += [cwd + '/shared/readline']
 path   += [cwd + '/extmod']
+path   += [cwd + '/lib/uzlib']
 # path   += [cwd + '/port']
 # path   += [cwd + '/lib/utils']
 # path   += [cwd + '/lib/libm_dbl']
@@ -54,6 +70,9 @@ elif rtconfig.PLATFORM == 'armcc':
 # group = group + DefineGroup('micropython/modules', modules_src, depend = ['PKG_USING_MICROPYTHON'])
 # group = group + DefineGroup('micropython/ra-port', ra_port_src, depend = ['PKG_USING_MICROPYTHON'])
 # group = group + DefineGroup('micropython/machine', machine_src, depend = ['PKG_USING_MICROPYTHON'])
+group = group + DefineGroup('micropython/share', share_src, depend = [''])
+group = group + DefineGroup('micropython/extmod', extmod_src, depend = [''])
+group = group + DefineGroup('micropython/lib', lib_src, depend = [''])
 group = group + DefineGroup('micropython', src, depend = [''], CPPPATH = path, LOCAL_CCFLAGS = LOCAL_CCFLAGS, CPPDEFINES=CPPDEFINES)
 
 Return('group')

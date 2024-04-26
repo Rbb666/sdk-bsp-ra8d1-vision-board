@@ -4,10 +4,6 @@
 #include "py/emitglue.h"
 #include "py/nativeglue.h"
 
-#if MICROPY_LONGINT_IMPL != 0
-#error "incompatible MICROPY_LONGINT_IMPL"
-#endif
-
 #if MICROPY_PY_BUILTINS_FLOAT
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;

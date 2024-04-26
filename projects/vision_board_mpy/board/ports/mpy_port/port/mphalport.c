@@ -35,29 +35,30 @@
 #include "mpputsnport.h"
 
 const char rtthread_help_text[] =
-"Welcome to MicroPython on RT-Thread!\n"
-"\n"
-"Control commands:\n"
-"  CTRL-A        -- on a blank line, enter raw REPL mode\n"
-"  CTRL-B        -- on a blank line, enter normal REPL mode\n"
-"  CTRL-C        -- interrupt a running program\n"
-"  CTRL-D        -- on a blank line, do a soft reset of the board\n"
-"  CTRL-E        -- on a blank line, enter paste mode\n"
-"\n"
-"For further help on a specific object, type help(obj)\n"
-;
+    "Welcome to MicroPython on RT-Thread!\n"
+    "\n"
+    "Control commands:\n"
+    "  CTRL-A        -- on a blank line, enter raw REPL mode\n"
+    "  CTRL-B        -- on a blank line, enter normal REPL mode\n"
+    "  CTRL-C        -- interrupt a running program\n"
+    "  CTRL-D        -- on a blank line, do a soft reset of the board\n"
+    "  CTRL-E        -- on a blank line, enter paste mode\n"
+    "\n"
+    "For further help on a specific object, type help(obj)\n"
+    ;
 
 #if !MICROPY_KBD_EXCEPTION
-void mp_hal_set_interrupt_char(int c) {
-
-}
+void mp_hal_set_interrupt_char(int c){}
 #endif
 
-int mp_hal_stdin_rx_chr(void) {
+int mp_hal_stdin_rx_chr(void)
+{
     char ch;
-    while (1) {
+    while (1)
+    {
         ch = mp_getchar();
-        if (ch != (char)0xFF) {
+        if (ch != (char)0xFF)
+        {
             break;
         }
         MICROPY_EVENT_POLL_HOOK;
@@ -74,42 +75,52 @@ uintptr_t mp_hal_stdio_poll(uintptr_t poll_flags)
 }
 
 // Send string of given length
-void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len) {
+void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len)
+{
     mp_putsn(str, len);
 }
 
-mp_uint_t mp_hal_ticks_us(void) {
+mp_uint_t mp_hal_ticks_us(void)
+{
     return rt_tick_get() * 1000000UL / RT_TICK_PER_SECOND;
 }
 
-mp_uint_t mp_hal_ticks_ms(void) {
+mp_uint_t mp_hal_ticks_ms(void)
+{
     return rt_tick_get() * 1000 / RT_TICK_PER_SECOND;
 }
 
-mp_uint_t mp_hal_ticks_cpu(void) {
+mp_uint_t mp_hal_ticks_cpu(void)
+{
     return rt_tick_get();
 }
 
-void mp_hal_delay_us(mp_uint_t us) {
+void mp_hal_delay_us(mp_uint_t us)
+{
     rt_tick_t t0 = rt_tick_get(), t1, dt;
     uint64_t dtick = us * RT_TICK_PER_SECOND / 1000000L;
-    while (1) {
+    while (1)
+    {
         t1 = rt_tick_get();
         dt = t1 - t0;
-        if (dt >= dtick) {
+        if (dt >= dtick)
+        {
             break;
         }
         mp_handle_pending(true);
     }
 }
 
-void mp_hal_delay_ms(mp_uint_t ms) {
+void mp_hal_delay_ms(mp_uint_t ms)
+{
     rt_tick_t t0 = rt_tick_get(), t1, dt;
     uint64_t dtick = ms * RT_TICK_PER_SECOND / 1000L;
-    while (1) {
+    while (1)
+    {
         t1 = rt_tick_get();
         dt = t1 - t0;
-        if (dt >= dtick) {
+        if (dt >= dtick)
+        {
             break;
         }
         MICROPY_EVENT_POLL_HOOK;
