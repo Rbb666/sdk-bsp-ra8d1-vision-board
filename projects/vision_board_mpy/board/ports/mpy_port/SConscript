@@ -1,6 +1,7 @@
 import os
 from building import *
 
+group = []
 src = []
 objs = []
 cwd  = GetCurrentDir()
@@ -9,11 +10,16 @@ CPPPATH = [cwd]
 CPPPATH += [cwd + '/port']
 CPPPATH += [cwd + '/renesas-ra']
 CPPPATH += [cwd + '/port/rtthread_port']
+CPPPATH += [cwd + '/port/rtthread_port/machine']
 
 src = Glob('port/*.c')
 src += Glob('renesas-ra/*.c')
-src += Glob('port/rtthread_port/*.c')
 
-objs = DefineGroup('micropython/port', src, depend = [''], CPPPATH = CPPPATH)
+rtt_src = Glob('port/rtthread_port/*.c')
+rtt_src += Glob('port/rtthread_port/machine/modmachine.c')
+rtt_src += Glob('port/rtthread_port/machine/machine_uart.c')
 
-Return('objs')
+group = group + DefineGroup('micropython/rtt_port', rtt_src, depend = [''])
+group = group + DefineGroup('micropython/port', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

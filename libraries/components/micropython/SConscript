@@ -27,6 +27,9 @@ extmod_src  += Glob('extmod/modselect.c')
 extmod_src  += Glob('extmod/modasyncio.c')
 extmod_src  += Glob('extmod/moddeflate.c')
 
+extmod_src  += Glob('extmod/machine_mem.c')
+extmod_src  += Glob('extmod/machine_pulse.c')
+
 lib_src  = Glob('lib/uzlib/*.c')
 
 # modules_src  = Glob('port/*.c')

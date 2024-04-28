@@ -96,6 +96,10 @@ extern const struct _mp_obj_module_t mp_module_uctypes;
 #undef MODULE_DEF_UCTYPES
 #define MODULE_DEF_UCTYPES { MP_ROM_QSTR(MP_QSTR_uctypes), MP_ROM_PTR(&mp_module_uctypes) },
 
+extern const struct _mp_obj_module_t mp_module_machine;
+#undef MODULE_DEF_MACHINE
+#define MODULE_DEF_MACHINE { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&mp_module_machine) },
+
 //extern const struct _mp_obj_module_t mp_module_cryptolib;
 //#undef MODULE_DEF_CRYPTOLIB
 //#define MODULE_DEF_CRYPTOLIB { MP_ROM_QSTR(MP_QSTR_cryptolib), MP_ROM_PTR(&mp_module_cryptolib) },
@@ -107,10 +111,6 @@ extern const struct _mp_obj_module_t mp_module_uctypes;
 //extern const struct _mp_obj_module_t display_module;
 //#undef MODULE_DEF_DISPLAY
 //#define MODULE_DEF_DISPLAY { MP_ROM_QSTR(MP_QSTR_display), MP_ROM_PTR(&display_module) },
-
-//extern const struct _mp_obj_module_t mp_module_machine;
-//#undef MODULE_DEF_MACHINE
-//#define MODULE_DEF_MACHINE { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&mp_module_machine) },
 
 //extern const struct _mp_obj_module_t mp_module_onewire;
 //#undef MODULE_DEF__ONEWIRE

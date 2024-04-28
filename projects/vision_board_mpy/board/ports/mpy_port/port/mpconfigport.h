@@ -49,6 +49,8 @@
 
 // Extended modules
 #define MICROPY_PY_ONEWIRE                  (0)
+#define MICROPY_PY_MACHINE                  (0)
+#define MICROPY_PY_MACHINE_UART             (0)
 
 
 #define MICROPY_HW_BOARD_NAME "Vision Board"
