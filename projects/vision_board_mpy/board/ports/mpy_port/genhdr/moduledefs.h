@@ -200,7 +200,7 @@ extern const struct _mp_obj_module_t mp_module_machine;
     MODULE_DEF_RANDOM \
     MODULE_DEF_RE \
     MODULE_DEF_SELECT \
-//    MODULE_DEF_MACHINE \
+    MODULE_DEF_MACHINE \
 //    MODULE_DEF_CRYPTOLIB \
 //    MODULE_DEF_DISPLAY \
 //    MODULE_DEF_HASHLIB \

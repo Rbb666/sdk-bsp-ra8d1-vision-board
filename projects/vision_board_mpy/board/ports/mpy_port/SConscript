@@ -16,8 +16,7 @@ src = Glob('port/*.c')
 src += Glob('renesas-ra/*.c')
 
 rtt_src = Glob('port/rtthread_port/*.c')
-rtt_src += Glob('port/rtthread_port/machine/modmachine.c')
-rtt_src += Glob('port/rtthread_port/machine/machine_uart.c')
+rtt_src += Glob('port/rtthread_port/machine/*.c')
 
 group = group + DefineGroup('micropython/rtt_port', rtt_src, depend = [''])
 group = group + DefineGroup('micropython/port', src, depend = [''], CPPPATH = CPPPATH)

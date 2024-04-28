@@ -38,23 +38,28 @@
 #define MICROPY_EMIT_THUMB                  (1)
 #define MICROPY_EMIT_INLINE_THUMB           (1)
 #define MICROPY_USE_INTERNAL_ERRNO          (1)
-#define MICROPY_KBD_EXCEPTION               (0)
+#define MICROPY_KBD_EXCEPTION               (1)
 #define MICROPY_PY_IO                       (1)
 
 /* rbbbb*/
 #define MICROPY_PY_MATH                     (1)
 #define MICROPY_PY_MATH_SPECIAL_FUNCTIONS   (1)
 #define MICROPY_PY_BUILTINS_FLOAT           (1)
+#define MICROPY_HW_ENABLE_UART_REPLC		(0)
+#define MICROPY_HW_USB_CDC					(1)
 /* rbbbb*/
 
 // Extended modules
 #define MICROPY_PY_ONEWIRE                  (0)
-#define MICROPY_PY_MACHINE                  (0)
-#define MICROPY_PY_MACHINE_UART             (0)
+#define MICROPY_PY_MACHINE                  (1)
+#define MICROPY_PY_MACHINE_UART             (1)
+#define MICROPY_PY_MACHINE_PIN				(1)
+#define MICROPY_PY_MACHINE_I2C				(1)
+#define MICROPY_PY_MACHINE_ADC				(1)
+#define MICROPY_PY_MACHINE_PWM				(1)
 
-
-#define MICROPY_HW_BOARD_NAME "Vision Board"
-#define MICROPY_HW_MCU_NAME "renesas-ra8d1"
+#define MICROPY_HW_BOARD_NAME			"Vision Board"
+#define MICROPY_HW_MCU_NAME				"renesas-ra8d1"
 
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>

@@ -32,10 +32,10 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
-#include "lib/timeutils/timeutils.h"
 #include "modmachine.h"
 
 #ifdef MICROPYTHON_USING_MACHINE_RTC
+#include "shared/timeutils/timeutils.h"
 
 #include <rtthread.h>
 #include <drivers/rtc.h>

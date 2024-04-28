@@ -5,6 +5,7 @@
 #include "py/builtin.h"
 #include "py/compile.h"
 #include "py/runtime.h"
+#include "py/stackctrl.h"
 #include "py/repl.h"
 #include "py/gc.h"
 #include "py/mperrno.h"
@@ -42,27 +43,39 @@ static char *stack_top;
     static char heap[4096];
 #endif
 
-int mpy_main()
+/* MicroPython runs as a task under RT-Thread */
+#define MP_TASK_STACK_SIZE	(64 * 1024)
+
+void mpy_main(void *parm)
 {
     int stack_dummy;
     stack_top = (char *)&stack_dummy;
 
+#if MICROPY_PY_THREAD
+    mp_thread_init(rt_thread_self()->stack_addr, MP_TASK_STACK_SIZE / sizeof(uintptr_t));
+#endif
+    /* Stack limit should be less than real stack size, so we have a */
+    /* chance to recover from limit hit. (Limit is measured in bytes) */
+    mp_stack_set_top(stack_top);
+    mp_stack_set_limit(MP_TASK_STACK_SIZE - 1024);
+
 #if MICROPY_ENABLE_GC
     gc_init(heap, heap + sizeof(heap));
 #endif
+#if MICROPY_HW_ENABLE_UART_REPLC
     mp_getchar_init();
     mp_putsn_init();
-
+#endif
     mp_init();
 
     pyexec_friendly_repl();
 
     mp_deinit();
 
+#if MICROPY_HW_ENABLE_UART_REPLC
     mp_putsn_deinit();
     mp_getchar_deinit();
-
-    return 0;
+#endif
 }
 
 #if MICROPY_ENABLE_GC
@@ -122,7 +135,12 @@ int DEBUG_printf(const char *format, ...)
 #include <finsh.h>
 static void python(uint8_t argc, char **argv)
 {
-    mpy_main();
+    rt_thread_t tid;
+
+    tid = rt_thread_create("mpy", mpy_main, RT_NULL,
+                           4096, 22, 20);
+    RT_ASSERT(tid != RT_NULL);
+    rt_thread_startup(tid);
 }
 MSH_CMD_EXPORT(python, MicroPython: `python [file.py]` execute python script);
 #endif /* defined(RT_USING_FINSH) && defined(FINSH_USING_MSH) */

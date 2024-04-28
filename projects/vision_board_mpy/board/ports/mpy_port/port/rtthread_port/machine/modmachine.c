@@ -31,7 +31,7 @@
 #include "py/runtime.h"
 #include "py/gc.h"
 #include "shared/runtime/pyexec.h"
-#include "modmachine.h"
+#include "extmod/modmachine.h"
 #include "machine_uart.h"
 #include "machine_adc.h"
 #include "machine_pwm.h"
@@ -148,6 +148,7 @@ rt_weak int mp_port_get_freq(int clkid, int *freq)
     return -1;
 }
 
+#if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
 STATIC mp_obj_t machine_freq(void)
 {
     int i;
@@ -166,6 +167,7 @@ STATIC mp_obj_t machine_freq(void)
     return MP_OBJ_FROM_PTR(ret_list);
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_freq_obj, machine_freq);
+#endif
 
 STATIC mp_obj_t pyb_wfi(void)
 {
@@ -210,19 +212,23 @@ STATIC mp_obj_t machine_sleep(void)
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_sleep_obj, machine_sleep);
 
+#if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
 STATIC mp_obj_t machine_deepsleep(void)
 {
     //TODO
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_deepsleep_obj, machine_deepsleep);
+#endif
 
+#if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
 STATIC mp_obj_t machine_reset_cause(void)
 {
     //TODO
     return MP_OBJ_NEW_SMALL_INT(42);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
+#endif
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] =
 {
@@ -235,16 +241,28 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] =
 
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_unique_id),           MP_ROM_PTR(&machine_unique_id_obj) },
-    { MP_ROM_QSTR(MP_QSTR_reset),               MP_ROM_PTR(&machine_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_soft_reset),          MP_ROM_PTR(&machine_soft_reset_obj) },
-    { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
     { MP_ROM_QSTR(MP_QSTR_idle),                MP_ROM_PTR(&pyb_wfi_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep),               MP_ROM_PTR(&machine_sleep_obj) },
-    { MP_ROM_QSTR(MP_QSTR_deepsleep),           MP_ROM_PTR(&machine_deepsleep_obj) },
-    { MP_ROM_QSTR(MP_QSTR_reset_cause),         MP_ROM_PTR(&machine_reset_cause_obj) },
-    { MP_ROM_QSTR(MP_QSTR_disable_irq),         MP_ROM_PTR(&pyb_disable_irq_obj) },
-    { MP_ROM_QSTR(MP_QSTR_enable_irq),          MP_ROM_PTR(&pyb_enable_irq_obj) },
-#if MICROPY_PY_PIN
+
+#if MICROPY_PY_MACHINE_BOOTLOADER
+    { MP_ROM_QSTR(MP_QSTR_bootloader), MP_ROM_PTR(&machine_bootloader_obj) },
+#endif
+#if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
+    { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&machine_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reset_cause), MP_ROM_PTR(&machine_reset_cause_obj) },
+#endif
+#if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
+    { MP_ROM_QSTR(MP_QSTR_freq), MP_ROM_PTR(&machine_freq_obj) },
+    { MP_ROM_QSTR(MP_QSTR_lightsleep), MP_ROM_PTR(&machine_lightsleep_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deepsleep), MP_ROM_PTR(&machine_deepsleep_obj) },
+#endif
+    // Interrupt related functions.
+#if MICROPY_PY_MACHINE_DISABLE_IRQ_ENABLE_IRQ
+    { MP_ROM_QSTR(MP_QSTR_disable_irq), MP_ROM_PTR(&machine_disable_irq_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable_irq), MP_ROM_PTR(&machine_enable_irq_obj) },
+#endif
+#if MICROPY_PY_MACHINE_PIN
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) },
 #endif
 #if NUM_LEDS
@@ -254,7 +272,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] =
     { MP_ROM_QSTR(MP_QSTR_I2C),                 MP_ROM_PTR(&machine_i2c_type) },
 #endif
 #if MICROPY_PY_MACHINE_SPI
-    { MP_ROM_QSTR(MP_QSTR_SPI),                 MP_ROM_PTR(&mp_machine_soft_spi_type) },
+    { MP_ROM_QSTR(MP_QSTR_SPI),                 MP_ROM_PTR(&machine_spi_type) },
 #endif
 #if MICROPY_PY_MACHINE_UART
     { MP_ROM_QSTR(MP_QSTR_UART),                MP_ROM_PTR(&machine_uart_type) },

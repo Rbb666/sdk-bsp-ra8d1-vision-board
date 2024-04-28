@@ -96,10 +96,14 @@
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V2
 #define RT_SERIAL_USING_DMA
+#define RT_USING_I2C
 #define RT_USING_PIN
+#define RT_USING_ADC
+#define RT_USING_PWM
 
 /* Using USB */
 
+#define RT_USING_USB
 
 /* C/C++ and POSIX layer */
 
@@ -176,6 +180,12 @@
 
 /* tools packages */
 
+#define PKG_USING_CMBACKTRACE
+#define PKG_CMBACKTRACE_PLATFORM_M7
+#define PKG_CMBACKTRACE_DUMP_STACK
+#define PKG_CMBACKTRACE_PRINT_ENGLISH
+#define PKG_USING_CMBACKTRACE_V10401
+#define PKG_CMBACKTRACE_VER_NUM 0x10401
 
 /* system packages */
 
@@ -190,16 +200,47 @@
 
 /* Micrium: Micrium software products porting for RT-Thread */
 
+#define PKG_USING_TINYUSB
+#define PKG_TINYUSB_STACK_SIZE 2048
+#define PKG_TINYUSB_THREAD_PRIORITY 8
+#define PKG_TINYUSB_MEM_SECTION ".data"
+#define PKG_TINYUSB_MEM_ALIGN 4
+#define PKG_TINYUSB_RHPORT_NUM_1
+#define PKG_TINYUSB_RHPORT_NUM 0
+#define PKG_TINYUSB_FULL_SPEED
+#define PKG_TINYUSB_DEVICE_PORT_SPEED 0x00
+#define PKG_TINYUSB_DEVICE_ENABLE
+#define PKG_TINYUSB_DEVICE_VID 0xCAFE
+#define PKG_TINYUSB_DEVICE_PID 0x4000
+#define PKG_TINYUSB_DEVICE_MANUFACTURER "TinyUSB"
+#define PKG_TINYUSB_DEVICE_PRODUCT "TinyUSB Device"
+#define PKG_TINYUSB_EDPT0_SIZE 64
+#define PKG_TINYUSB_DEVICE_CURRENT 100
+#define PKG_TINYUSB_DEVICE_CDC
+#define CFG_TUD_CDC 1
+#define PKG_TINYUSB_DEVICE_CDC_STRING "TinyUSB CDC"
+#define PKG_TINYUSB_DEVICE_CDC_EPNUM_NOTIF 1
+#define PKG_TINYUSB_DEVICE_CDC_EPNUM 2
+#define PKG_TINYUSB_DEVICE_CDC_RX_BUFSIZE 64
+#define PKG_TINYUSB_DEVICE_CDC_TX_BUFSIZE 64
+#define PKG_TINYUSB_DEBUG_NO
+#define CFG_TUSB_DEBUG 0
+#define PKG_USING_TINYUSB_V01401
 
 /* peripheral libraries and drivers */
+
+/* HAL & SDK Drivers */
+
+/* STM32 HAL & SDK Drivers */
+
+
+/* Kendryte SDK */
+
 
 /* sensors drivers */
 
 
 /* touch drivers */
-
-
-/* Kendryte SDK */
 
 
 /* AI packages */

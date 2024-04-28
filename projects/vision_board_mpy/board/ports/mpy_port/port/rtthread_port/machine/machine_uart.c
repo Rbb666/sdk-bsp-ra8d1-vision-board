@@ -34,9 +34,9 @@
 
 #include <stdarg.h>
 #include "machine_uart.h"
-#include "rtdevice.h"
 
 #if MICROPY_PY_MACHINE_UART
+#include "rtdevice.h"
 
 #ifndef RT_USING_SERIAL
     #error "Please define the RT_USING_SERIAL on 'rtconfig.h'"

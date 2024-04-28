@@ -33,7 +33,7 @@
 #include "modmachine.h"
 #include "mphalport.h"
 
-#ifdef MICROPYTHON_USING_MACHINE_PWM
+#if MICROPY_PY_MACHINE_PWM
 
 #include <rtthread.h>
 #include <drivers/rt_drv_pwm.h>
@@ -44,7 +44,8 @@
 
 extern const mp_obj_type_t machine_pwm_type;
 
-typedef struct _machine_pwm_obj_t {
+typedef struct _machine_pwm_obj_t
+{
     mp_obj_base_t base;
     struct rt_device_pwm *pwm_device;
     char dev_name[RT_NAME_MAX];
@@ -55,13 +56,17 @@ typedef struct _machine_pwm_obj_t {
     uint32_t freq;
 } machine_pwm_obj_t;
 
-STATIC void machine_pwm_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+STATIC void machine_pwm_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
+{
     machine_pwm_obj_t *self = self_in;
 
     mp_printf(print, "PWM(%p; ", self);
-    if (self->id >= 0) {
+    if (self->id >= 0)
+    {
         mp_printf(print, "pwm_id=%d, ", self->id);
-    } else {
+    }
+    else
+    {
         mp_printf(print, "pwm_name=%s, ", self->dev_name);
     }
     mp_printf(print, "channel=%d, ", self->channel);
@@ -69,57 +74,71 @@ STATIC void machine_pwm_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
     mp_printf(print, "duty=%d)", self->duty);
 }
 
-STATIC void error_check(bool status, const char *msg) {
-    if (!status) {
+STATIC void error_check(bool status, const char *msg)
+{
+    if (!status)
+    {
         nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, msg));
     }
 }
 
 STATIC void machine_pwm_init_helper(machine_pwm_obj_t *self,
-                                 size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+                                    size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
+{
     rt_err_t result = RT_EOK;
     uint32_t period = 0, pulse = 0;
     char pwm_dev_name[RT_NAME_MAX];
     struct rt_device_pwm *pwm_device = RT_NULL;
     enum { ARG_channel, ARG_freq, ARG_duty };
-    static const mp_arg_t allowed_args[] = {
+    static const mp_arg_t allowed_args[] =
+    {
         { MP_QSTR_channel,  MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = 1} },
+#if MICROPY_PY_MACHINE_PWM_DUTY
         { MP_QSTR_duty, MP_ARG_INT, {.u_int = 0} },
+#endif
     };
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args,
                      MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int tval = args[ARG_channel].u_int;
-    if ((tval < 0) || (tval > 4)) {
+    if ((tval < 0) || (tval > 4))
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "Bad channel %d", tval));
     }
     self->channel = tval;
 
     tval = args[ARG_freq].u_int;
-    if ((tval < 1) || (tval > 156250)) {
+    if ((tval < 1) || (tval > 156250))
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "Bad frequency %d", tval));
     }
     self->freq = tval;
-
+#if MICROPY_PY_MACHINE_PWM_DUTY
     tval = args[ARG_duty].u_int;
-    if ((tval < 0) || (tval > 255)) {
+    if ((tval < 0) || (tval > 255))
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "Bad duty %d", tval));
     }
     self->duty = tval;
+#endif
 
-    if (self->id >= 0) {
+    if (self->id >= 0)
+    {
         rt_snprintf(pwm_dev_name, sizeof(pwm_dev_name), "pwm%d", self->id);
-    } else {
+    }
+    else
+    {
         rt_strncpy(pwm_dev_name, self->dev_name, RT_NAME_MAX);
     }
 
     pwm_device = (struct rt_device_pwm *) rt_device_find(pwm_dev_name);
-    if (pwm_device == RT_NULL || pwm_device->parent.type != RT_Device_Class_PWM) {
+    if (pwm_device == RT_NULL || pwm_device->parent.type != RT_Device_Class_PWM)
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "PWM(%s) don't exist", pwm_dev_name));
     }
@@ -140,7 +159,8 @@ STATIC void machine_pwm_init_helper(machine_pwm_obj_t *self,
 }
 
 STATIC mp_obj_t machine_pwm_make_new(const mp_obj_type_t *type,
-                                  size_t n_args, size_t n_kw, const mp_obj_t *args) {
+                                     size_t n_args, size_t n_kw, const mp_obj_t *args)
+{
     mp_arg_check_num(n_args, n_kw, 1, MP_OBJ_FUN_ARGS_MAX, true);
 
     // create PWM object from the given pin
@@ -149,12 +169,17 @@ STATIC mp_obj_t machine_pwm_make_new(const mp_obj_type_t *type,
     self->is_init = RT_FALSE;
 
     // check input PWM device name or ID
-    if (mp_obj_is_small_int(args[0])) {
+    if (mp_obj_is_small_int(args[0]))
+    {
         self->id = mp_obj_get_int(args[0]);
-    } else if (mp_obj_is_qstr(args[0])) {
+    }
+    else if (mp_obj_is_qstr(args[0]))
+    {
         self->id = -1;
         rt_strncpy(self->dev_name, mp_obj_str_get_str(args[0]), RT_NAME_MAX);
-    } else {
+    }
+    else
+    {
         error_check(0, "Input PWM device name or ID error.");
     }
 
@@ -170,17 +195,20 @@ STATIC mp_obj_t machine_pwm_make_new(const mp_obj_type_t *type,
 }
 
 STATIC mp_obj_t machine_pwm_init(size_t n_args,
-                              const mp_obj_t *args, mp_map_t *kw_args) {
+                                 const mp_obj_t *args, mp_map_t *kw_args)
+{
     machine_pwm_init_helper(args[0], n_args - 1, args + 1, kw_args);
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_KW(machine_pwm_init_obj, 1, machine_pwm_init);
 
-STATIC mp_obj_t machine_pwm_deinit(mp_obj_t self_in) {
+STATIC mp_obj_t machine_pwm_deinit(mp_obj_t self_in)
+{
     machine_pwm_obj_t *self = MP_OBJ_TO_PTR(self_in);
     rt_err_t result = RT_EOK;
 
-    if (self->is_init == RT_TRUE) {
+    if (self->is_init == RT_TRUE)
+    {
         result = rt_pwm_disable(self->pwm_device, self->channel);
         error_check(result == RT_EOK, "PWM disable error");
         self->is_init = RT_FALSE;
@@ -189,21 +217,24 @@ STATIC mp_obj_t machine_pwm_deinit(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pwm_deinit_obj, machine_pwm_deinit);
 
-STATIC mp_obj_t machine_pwm_freq(size_t n_args, const mp_obj_t *args) {
+STATIC mp_obj_t machine_pwm_freq(size_t n_args, const mp_obj_t *args)
+{
     machine_pwm_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     uint32_t period = 0, pulse = 0;
     rt_err_t result = RT_EOK;
 
     error_check(self->is_init == RT_TRUE, "PWM device uninitialized");
 
-    if (n_args == 1) {
+    if (n_args == 1)
+    {
         // get
         return MP_OBJ_NEW_SMALL_INT(self->freq);
     }
 
     // set
     int tval = mp_obj_get_int(args[1]);
-    if ((tval < 1) || (tval > 156250)) {
+    if ((tval < 1) || (tval > 156250))
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "Bad frequency %d", tval));
     }
@@ -222,21 +253,25 @@ STATIC mp_obj_t machine_pwm_freq(size_t n_args, const mp_obj_t *args) {
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pwm_freq_obj, 1, 2, machine_pwm_freq);
 
-STATIC mp_obj_t machine_pwm_duty(size_t n_args, const mp_obj_t *args) {
+#if MICROPY_PY_MACHINE_PWM_DUTY
+STATIC mp_obj_t machine_pwm_duty(size_t n_args, const mp_obj_t *args)
+{
     machine_pwm_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     uint32_t period = 0, pulse = 0;
     rt_err_t result = RT_EOK;
 
     error_check(self->is_init == RT_TRUE, "PWM device uninitialized");
 
-    if (n_args == 1) {
+    if (n_args == 1)
+    {
         // get
         return MP_OBJ_NEW_SMALL_INT(self->duty);
     }
 
     // set
     int tval = mp_obj_get_int(args[1]);
-    if ((tval < 0) || (tval > 255)) {
+    if ((tval < 0) || (tval > 255))
+    {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError,
                                                 "Bad duty %d", tval));
     }
@@ -252,25 +287,29 @@ STATIC mp_obj_t machine_pwm_duty(size_t n_args, const mp_obj_t *args) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pwm_duty_obj,
-        1, 2, machine_pwm_duty);
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pwm_duty_obj, 1, 2, machine_pwm_duty);
+#endif
 
-STATIC const mp_rom_map_elem_t machine_pwm_locals_dict_table[] = {
+STATIC const mp_rom_map_elem_t machine_pwm_locals_dict_table[] =
+{
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_pwm_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_pwm_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq), MP_ROM_PTR(&machine_pwm_freq_obj) },
+#if MICROPY_PY_MACHINE_PWM_DUTY
     { MP_ROM_QSTR(MP_QSTR_duty), MP_ROM_PTR(&machine_pwm_duty_obj) },
+#endif
 };
 
 STATIC MP_DEFINE_CONST_DICT(machine_pwm_locals_dict,
                             machine_pwm_locals_dict_table);
 
-const mp_obj_type_t machine_pwm_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_PWM,
-    .print = machine_pwm_print,
-    .make_new = machine_pwm_make_new,
-    .locals_dict = (mp_obj_dict_t *) &machine_pwm_locals_dict,
-};
+MP_DEFINE_CONST_OBJ_TYPE(
+    machine_pwm_type,
+    MP_QSTR_PWM,
+    MP_TYPE_FLAG_NONE,
+    make_new, machine_pwm_make_new,
+    print, machine_pwm_print,
+    locals_dict, &machine_pwm_locals_dict
+);
 
 #endif // MICROPYTHON_USING_MACHINE_PWM

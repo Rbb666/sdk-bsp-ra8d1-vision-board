@@ -28,11 +28,15 @@
 #include <string.h>
 
 #include <rtthread.h>
-#include <py/mpconfig.h>
-#include <py/runtime.h>
-#include "mphalport.h"
-#include "mpgetcharport.h"
-#include "mpputsnport.h"
+#include "py/mphal.h"
+#include "py/mpconfig.h"
+#include "py/runtime.h"
+#include "py/ringbuf.h"
+#include "shared/runtime/interrupt_char.h"
+
+#ifdef PKG_USING_TINYUSB
+    #include "tusb.h"
+#endif
 
 const char rtthread_help_text[] =
     "Welcome to MicroPython on RT-Thread!\n"
@@ -47,24 +51,92 @@ const char rtthread_help_text[] =
     "For further help on a specific object, type help(obj)\n"
     ;
 
+#if MICROPY_HW_USB_CDC
+
+#ifndef MICROPY_HW_STDIN_BUFFER_LEN
+    #define MICROPY_HW_STDIN_BUFFER_LEN 512
+#endif
+
+STATIC uint8_t stdin_ringbuf_array[MICROPY_HW_STDIN_BUFFER_LEN];
+ringbuf_t stdin_ringbuf = { stdin_ringbuf_array, sizeof(stdin_ringbuf_array) };
+#endif
+
 #if !MICROPY_KBD_EXCEPTION
-void mp_hal_set_interrupt_char(int c){}
+void mp_hal_set_interrupt_char(int c) {}
+#endif
+
+#if MICROPY_HW_USB_CDC
+uint8_t cdc_itf_pending; // keep track of cdc interfaces which need attention to poll
+
+void poll_cdc_interfaces(void)
+{
+    // any CDC interfaces left to poll?
+    if (cdc_itf_pending && ringbuf_free(&stdin_ringbuf))
+    {
+        for (uint8_t itf = 0; itf < 8; ++itf)
+        {
+            if (cdc_itf_pending & (1 << itf))
+            {
+                tud_cdc_rx_cb(itf);
+                if (!cdc_itf_pending)
+                {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void tud_cdc_rx_cb(uint8_t itf)
+{
+    // consume pending USB data immediately to free usb buffer and keep the endpoint from stalling.
+    // in case the ringbuffer is full, mark the CDC interface that need attention later on for polling
+    cdc_itf_pending &= ~(1 << itf);
+    for (uint32_t bytes_avail = tud_cdc_n_available(itf); bytes_avail > 0; --bytes_avail)
+    {
+        if (ringbuf_free(&stdin_ringbuf))
+        {
+            int data_char = tud_cdc_read_char();
+            if (data_char == mp_interrupt_char)
+            {
+                mp_sched_keyboard_interrupt();
+            }
+            else
+            {
+                ringbuf_put(&stdin_ringbuf, data_char);
+            }
+        }
+        else
+        {
+            cdc_itf_pending |= (1 << itf);
+            return;
+        }
+    }
+}
 #endif
 
 int mp_hal_stdin_rx_chr(void)
 {
-    char ch;
-    while (1)
+    for (;;)
     {
-        ch = mp_getchar();
-        if (ch != (char)0xFF)
+#if MICROPY_HW_USB_CDC
+        poll_cdc_interfaces();
+#endif
+
+        int c = ringbuf_get(&stdin_ringbuf);
+        if (c != -1)
         {
-            break;
+            return c;
         }
-        MICROPY_EVENT_POLL_HOOK;
-        rt_thread_delay(1);
+#if MICROPY_PY_OS_DUPTERM
+        int dupterm_c = mp_uos_dupterm_rx_chr();
+        if (dupterm_c >= 0)
+        {
+            return dupterm_c;
+        }
+#endif
+        MICROPY_EVENT_POLL_HOOK
     }
-    return ch;
 }
 
 // Send string of given length
@@ -75,9 +147,54 @@ uintptr_t mp_hal_stdio_poll(uintptr_t poll_flags)
 }
 
 // Send string of given length
-void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len)
+mp_uint_t mp_hal_stdout_tx_strn(const char *str, mp_uint_t len)
 {
+    mp_uint_t ret = len;
+    bool did_write = false;
+#if MICROPY_HW_ENABLE_UART_REPL
     mp_putsn(str, len);
+#endif
+
+#if MICROPY_HW_USB_CDC
+    if (tud_cdc_connected())
+    {
+        size_t i = 0;
+        while (i < len)
+        {
+            uint32_t n = len - i;
+            if (n > CFG_TUD_CDC_EP_BUFSIZE)
+            {
+                n = CFG_TUD_CDC_EP_BUFSIZE;
+            }
+            int timeout = 0;
+            // Wait with a max of USC_CDC_TIMEOUT ms
+            while (n > tud_cdc_write_available() && timeout++ < MICROPY_HW_USB_CDC_TX_TIMEOUT)
+            {
+                MICROPY_EVENT_POLL_HOOK
+            }
+            if (timeout >= MICROPY_HW_USB_CDC_TX_TIMEOUT)
+            {
+                break;
+            }
+            uint32_t n2 = tud_cdc_write(str + i, n);
+            tud_cdc_write_flush();
+            i += n2;
+        }
+        ret = MIN(i, ret);
+        did_write = true;
+    }
+#endif
+
+#if MICROPY_PY_OS_DUPTERM
+    int dupterm_res = mp_os_dupterm_tx_strn(str, len);
+    if (dupterm_res >= 0)
+    {
+        did_write = true;
+        ret = MIN((mp_uint_t)dupterm_res, ret);
+    }
+#endif
+
+    return did_write ? ret : 0;
 }
 
 mp_uint_t mp_hal_ticks_us(void)
