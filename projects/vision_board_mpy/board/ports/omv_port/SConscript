@@ -1,0 +1,18 @@
+import os
+from building import *
+
+src = []
+objs = []
+cwd  = GetCurrentDir()
+CPPPATH = [cwd]
+
+src = Glob('omv_fs/*.c')
+src += Glob('omv_usb/*.c')
+src += Glob('omv_alloc/*.c')
+src += Glob('omv_framebuffer/*.c')
+
+CPPDEFINES = ['ARM_MATH_CM85', '__FPU_PRESENT = 1']
+
+objs = DefineGroup('openmv/rtt_port', src, depend = ['BSP_USING_OPENMV'], CPPPATH = CPPPATH, CPPDEFINES = CPPDEFINES)
+
+Return('objs')

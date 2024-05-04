@@ -251,10 +251,10 @@ static int SDRAM_Init(void)
 {
     drv_sdram_init();
 
-    LOG_D("sdram init success, mapped at 0x%X, size is %d bytes, data width is %d", 0x68000000, BSP_USING_SDRAM_SIZE, 16);
+    LOG_D("sdram init success, mapped at 0x%X, size is %d bytes, data width is %d", 0x68C00000, BSP_USING_SDRAM_SIZE - 0xC00000, 16);
 #ifdef RT_USING_MEMHEAP_AS_HEAP
     /* If RT_USING_MEMHEAP_AS_HEAP is enabled, SDRAM is initialized to the heap */
-    rt_memheap_init(&system_heap, "sdram", (void *)0x68000000, BSP_USING_SDRAM_SIZE);
+    rt_memheap_init(&system_heap, "sdram", (void *)0x68C00000, BSP_USING_SDRAM_SIZE - 0xC00000);
 #endif
     return RT_EOK;
 }

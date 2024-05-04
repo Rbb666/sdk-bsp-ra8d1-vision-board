@@ -528,6 +528,9 @@ menu "Hardware Drivers Config"
                 config BSP_USING_PWM6
                     bool "Enable GPT6 (16-Bits) output PWM"
                     default n
+                config BSP_USING_PWM7
+                    bool "Enable GPT7 (16-Bits) output PWM"
+                    default n
                 config BSP_USING_PWM12
                     bool "Enable GPT12 (16-Bits) output PWM"
                     default n
@@ -625,3 +628,111 @@ menu "Hardware Drivers Config"
             endif
     endmenu
 endmenu
+
+menuconfig PKG_TINYUSB_CONFIG
+        bool "Tinyusb Config"
+        default n
+        if PKG_TINYUSB_CONFIG
+            config PKG_TINYUSB_AUTO_INIT
+                bool "TinyUSB AUTO INIT flag"
+                default n
+        endif
+
+menuconfig BSP_USING_OPENMV
+    bool "Enable OpenMV for RT-Thread"
+    default y
+    if BSP_USING_OPENMV
+        menu "OpenMV Buffer Size Configure"
+            config OPENMV_JPEG_BUF_SIZE
+                int "OpenMV jpeg buffer size"
+                range 0 20971520
+                default 32768
+            config OPENMV_HEAP_SIZE
+                int "OpenMV heap size"
+                range 0 20971520
+                default 233472
+        endmenu
+
+        menu "Camera Pins Configure"
+            config DCMI_RESET_PIN_NUM
+                hex "(HEX)RESET pin index"
+                default 0x0704F
+            config DCMI_POWER_PIN_NUM
+                hex "(HEX)POWER pin index"
+                default 0x0705F
+        endmenu
+
+        menu "OpenMV Extra Peripheral Configure"
+            config OPENMV_USING_LCD
+                bool "Enable LCD For OpenMV"
+                select BSP_USING_LCD
+                default y
+            menuconfig OPENMV_USING_KEY
+                bool "Enable USER KEY For OpenMV"
+                default n
+                select BSP_USING_GPIO
+                if OPENMV_USING_KEY
+                    config USER_KEY_PIN_NAME
+                        string "USER KEY Pin Name"
+                        default "p907"
+                endif
+        endmenu
+
+        config OMV_ENABLE_TF
+            bool "Enable tflite support"
+            default n
+
+        menuconfig SENSOR_USING_XCLK
+            bool "Enable SENSOR XCLK"
+            default n
+            select RT_USING_PWM
+            select BSP_USING_PWM7
+            if SENSOR_USING_XCLK
+                config CAM_PWM_DEV_NAME
+                    string "Camera pwm device name"
+                    default "pwm7"
+            endif
+
+        config SENSOR_BUS_NAME
+            string "Sensor I2C Bus Name"
+            depends on BSP_USING_I2C
+            default "i2c1"
+
+        config SENSOR_MT9V034
+            int "Sensor support MT9V034"
+            range 0 1
+            default 1
+        config SENSOR_OV2640
+            int "Sensor support OV2640"
+            range 0 1
+            default 1
+        config SENSOR_OV5640
+            int "Sensor support OV5640"
+            range 0 1
+            default 1
+        config SENSOR_OV7725
+            int "Sensor support OV7725"
+            range 0 1
+            default 1
+        config SENSOR_OV7670
+            int "Sensor support OV7670"
+            range 0 1
+            default 1
+        config SENSOR_OV7690
+            int "Sensor support OV7690"
+            range 0 1
+            default 0
+        config SENSOR_OV9650
+            int "Sensor support OV9650"
+            range 0 1
+            default 0
+        config SENSOR_GC0328
+            int "Sensor support GC0328"
+            range 0 1
+            default 1            
+            default 1          
+        config SENSOR_SCC8660
+            int "Sensor support SCC8660"
+            range 0 1
+            default 1  
+    endif

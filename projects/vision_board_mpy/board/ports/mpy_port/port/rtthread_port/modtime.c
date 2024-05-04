@@ -1,9 +1,11 @@
 /*
  * This file is part of the MicroPython project, http://micropython.org/
  *
+ * Development of the code in this file was sponsored by Microbric Pty Ltd
+ *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2016-2023 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,38 +26,33 @@
  * THE SOFTWARE.
  */
 
+#include <sys/time.h>
+
 #include "py/obj.h"
-#include "py/mphal.h"
-#include "irq.h"
+#include "shared/timeutils/timeutils.h"
 
-#if IRQ_ENABLE_STATS
-uint32_t irq_stats[IRQ_STATS_MAX] = {0};
-#endif
-
-// disable_irq()
-// Disable interrupt requests.
-// Returns the previous IRQ state which can be passed to enable_irq.
-STATIC mp_obj_t machine_disable_irq(void)
-{
-    return mp_obj_new_bool(disable_irq() == IRQ_STATE_ENABLED);
+// Return the localtime as an 8-tuple.
+STATIC mp_obj_t mp_time_localtime_get(void) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    timeutils_struct_time_t tm;
+    timeutils_seconds_since_epoch_to_struct_time(tv.tv_sec, &tm);
+    mp_obj_t tuple[8] = {
+        tuple[0] = mp_obj_new_int(tm.tm_year),
+        tuple[1] = mp_obj_new_int(tm.tm_mon),
+        tuple[2] = mp_obj_new_int(tm.tm_mday),
+        tuple[3] = mp_obj_new_int(tm.tm_hour),
+        tuple[4] = mp_obj_new_int(tm.tm_min),
+        tuple[5] = mp_obj_new_int(tm.tm_sec),
+        tuple[6] = mp_obj_new_int(tm.tm_wday),
+        tuple[7] = mp_obj_new_int(tm.tm_yday),
+    };
+    return mp_obj_new_tuple(8, tuple);
 }
-MP_DEFINE_CONST_FUN_OBJ_0(machine_disable_irq_obj, machine_disable_irq);
 
-// enable_irq(state=True)
-// Enable interrupt requests, based on the argument, which is usually the
-// value returned by a previous call to disable_irq.
-STATIC mp_obj_t machine_enable_irq(uint n_args, const mp_obj_t *arg)
-{
-    enable_irq((n_args == 0 || mp_obj_is_true(arg[0])) ? IRQ_STATE_ENABLED : IRQ_STATE_DISABLED);
-    return mp_const_none;
+// Return the number of seconds since the Epoch.
+STATIC mp_obj_t mp_time_time_get(void) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return mp_obj_new_int(tv.tv_sec);
 }
-MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_enable_irq_obj, 0, 1, machine_enable_irq);
-
-#if IRQ_ENABLE_STATS
-// return a memoryview of the irq statistics array
-STATIC mp_obj_t pyb_irq_stats(void)
-{
-    return mp_obj_new_memoryview(0x80 | 'I', MP_ARRAY_SIZE(irq_stats), &irq_stats[0]);
-}
-MP_DEFINE_CONST_FUN_OBJ_0(pyb_irq_stats_obj, pyb_irq_stats);
-#endif

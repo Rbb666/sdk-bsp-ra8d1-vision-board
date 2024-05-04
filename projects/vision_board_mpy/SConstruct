@@ -90,11 +90,13 @@ if os.path.exists(os.path.join(os.getcwd(), "libraries")):
     objs.extend(SConscript(os.path.join('libraries/components/micropython', '', 'SConscript')))
     objs.extend(SConscript(os.path.join('libraries/components/tinyusb', '', 'SConscript')))
     objs.extend(SConscript(os.path.join('libraries/components/CmBacktrace-v1.4.1', '', 'SConscript')))
+    objs.extend(SConscript(os.path.join('libraries/components/openmv-v4.5.4', '', 'SConscript')))
 else:
     # tinyusb package
     objs.extend(SConscript(os.path.join('../../libraries/components/micropython', '', 'SConscript')))
     objs.extend(SConscript(os.path.join('../../libraries/components/tinyusb', '', 'SConscript')))
     objs.extend(SConscript(os.path.join('../../libraries/components/CmBacktrace-v1.4.1', '', 'SConscript')))
+    objs.extend(SConscript(os.path.join('../../libraries/components/openmv-v4.5.4', '', 'SConscript')))
 
 # include drivers
 objs.extend(SConscript(os.path.join(libraries_path_prefix, 'HAL_Drivers', 'SConscript')))
