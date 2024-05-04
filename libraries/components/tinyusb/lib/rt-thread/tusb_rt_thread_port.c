@@ -77,5 +77,7 @@ static int init_tinyusb(void)
 
     return 0;
 }
+#ifdef PKG_TINYUSB_AUTO_INIT
 INIT_APP_EXPORT(init_tinyusb);
+#endif
 #endif /*__RTTHREAD__*/

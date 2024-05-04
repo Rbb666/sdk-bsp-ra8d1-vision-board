@@ -31,7 +31,7 @@
 // are unavailable.
 #define MICROPY_VERSION_MAJOR 1
 #define MICROPY_VERSION_MINOR 22
-#define MICROPY_VERSION_MICRO 2
+#define MICROPY_VERSION_MICRO 0
 #define MICROPY_VERSION_PRERELEASE 0
 
 // Combined version as a 32-bit number for convenience to allow version
@@ -542,7 +542,7 @@
 // Note: enabling this will use the gcc-specific extensions of ranged designated
 // initialisers and addresses of labels, which are not part of the C99 standard.
 #ifndef MICROPY_OPT_COMPUTED_GOTO
-#define MICROPY_OPT_COMPUTED_GOTO (0)
+#define MICROPY_OPT_COMPUTED_GOTO (1)
 #endif
 
 // Optimise the fast path for loading attributes from instance types. Increases
@@ -643,6 +643,10 @@
 // *i* is the loop index variable (e.g. can be used to run every x loops)
 #ifndef MICROPY_GC_HOOK_LOOP
 #define MICROPY_GC_HOOK_LOOP(i)
+#endif
+
+#ifndef MICROPY_NLR_RAISE_HOOK
+#define MICROPY_NLR_RAISE_HOOK
 #endif
 
 // Whether to provide m_tracked_calloc, m_tracked_free functions
@@ -1849,7 +1853,7 @@ typedef double mp_float_t;
 // String used for the second part of the banner, and sys.implementation._machine
 #ifndef MICROPY_BANNER_MACHINE
 #ifdef MICROPY_HW_BOARD_NAME
-#define MICROPY_BANNER_MACHINE MICROPY_HW_BOARD_NAME " with " MICROPY_HW_MCU_NAME
+#define MICROPY_BANNER_MACHINE MICROPY_HW_BOARD_NAME "-" MICROPY_HW_MCU_NAME
 #else
 #define MICROPY_BANNER_MACHINE MICROPY_PY_SYS_PLATFORM " [" MICROPY_PLATFORM_COMPILER "] version"
 #endif

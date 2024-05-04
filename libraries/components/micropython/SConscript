@@ -10,11 +10,14 @@ src     = Glob('py/*.c')
 
 share_src   = Glob('shared/runtime/*.c')
 share_src   += Glob('shared/runtime/gchelper_thumb2.s')
+share_src   += Glob('shared/runtime/gchelper_generic.c')
+share_src   += Glob('shared/timeutils/timeutils.c')
 share_src   += Glob('shared/readline/*.c')
 
 extmod_src  = Glob('extmod/moductypes.c')
 extmod_src  += Glob('extmod/modbinascii.c')
 extmod_src  += Glob('extmod/modcryptolib.c')
+extmod_src  += Glob('extmod/os_dupterm.c')
 extmod_src  += Glob('extmod/modheapq.c')
 extmod_src  += Glob('extmod/modhashlib.c')
 extmod_src  += Glob('extmod/modtime.c')
@@ -26,6 +29,7 @@ extmod_src  += Glob('extmod/modre.c')
 extmod_src  += Glob('extmod/modselect.c')
 extmod_src  += Glob('extmod/modasyncio.c')
 extmod_src  += Glob('extmod/moddeflate.c')
+# extmod_src  += Glob('extmod/utime_mphal.c')
 
 extmod_src  += Glob('extmod/machine_mem.c')
 extmod_src  += Glob('extmod/machine_pulse.c')
@@ -50,6 +54,7 @@ SrcRemove(src, ['py/modthread.c'])
 path    = [cwd]
 path   += [cwd + '/py']
 path   += [cwd + '/shared/runtime']
+path   += [cwd + '/shared/timeutils']
 path   += [cwd + '/shared/readline']
 path   += [cwd + '/extmod']
 path   += [cwd + '/lib/uzlib']

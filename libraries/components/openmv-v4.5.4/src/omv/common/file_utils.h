@@ -8,6 +8,7 @@
  */
 #ifndef __FILE_UTILS_H__
 #define __FILE_UTILS_H__
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <ff.h>
@@ -24,7 +25,7 @@ FRESULT file_ll_open(FIL *fp, const TCHAR *path, BYTE mode);
 FRESULT file_ll_close(FIL *fp);
 FRESULT file_ll_read(FIL *fp, void *buff, UINT btr, UINT *br);
 FRESULT file_ll_write(FIL *fp, const void *buff, UINT btw, UINT *bw);
-FRESULT file_ll_opendir(FF_DIR *dp, const TCHAR *path);
+//FRESULT file_ll_opendir(FF_DIR *dp, const TCHAR *path);
 FRESULT file_ll_stat(const TCHAR *path, FILINFO *fno);
 FRESULT file_ll_mkdir(const TCHAR *path);
 FRESULT file_ll_unlink(const TCHAR *path);
