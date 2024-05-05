@@ -29,26 +29,11 @@ extmod_src  += Glob('extmod/modre.c')
 extmod_src  += Glob('extmod/modselect.c')
 extmod_src  += Glob('extmod/modasyncio.c')
 extmod_src  += Glob('extmod/moddeflate.c')
-# extmod_src  += Glob('extmod/utime_mphal.c')
-
 extmod_src  += Glob('extmod/machine_mem.c')
 extmod_src  += Glob('extmod/machine_pulse.c')
 
-lib_src  = Glob('lib/uzlib/*.c')
-
-# modules_src  = Glob('port/*.c')
-# modules_src  += Glob('port/native/*.c')
-# modules_src  += Glob('port/modules/*.c')
-# modules_src  += Glob('port/modules/user/*.c')
-
-# ra_port_src = Glob('ports/renesas/*.c')
-# machine_src = Glob('port/modules/machine/*.c')
-
-# SrcRemove(src, ['shared/runtime/sys_stdio_mphal.c'])
-# SrcRemove(src, ['lib/libm_dbl/sqrt.c'])
 SrcRemove(share_src, ['shared/runtime/gchelper_generic.c'])
 SrcRemove(share_src, ['shared/runtime/softtimer.c'])
-SrcRemove(lib_src, ['lib/uzlib/defl_static.c'])
 SrcRemove(src, ['py/modthread.c'])
 
 path    = [cwd]
@@ -58,13 +43,6 @@ path   += [cwd + '/shared/timeutils']
 path   += [cwd + '/shared/readline']
 path   += [cwd + '/extmod']
 path   += [cwd + '/lib/uzlib']
-# path   += [cwd + '/port']
-# path   += [cwd + '/lib/utils']
-# path   += [cwd + '/lib/libm_dbl']
-# path   += [cwd + '/port/modules']
-# path   += [cwd + '/port/modules/machine']
-# path   += [cwd + '/ports/renesas']
-# path   += [cwd + '/ports/renesas/boards/EK-RA8D1']
 
 LOCAL_CCFLAGS = ''
 CPPDEFINES = ['MICROPY_PY_SENSOR = 1']
@@ -75,12 +53,8 @@ if rtconfig.PLATFORM in ['gcc', 'armclang'] :
 elif rtconfig.PLATFORM == 'armcc':
     LOCAL_CCFLAGS += ' --c99 --gnu'
 
-# group = group + DefineGroup('micropython/modules', modules_src, depend = ['PKG_USING_MICROPYTHON'])
-# group = group + DefineGroup('micropython/ra-port', ra_port_src, depend = ['PKG_USING_MICROPYTHON'])
-# group = group + DefineGroup('micropython/machine', machine_src, depend = ['PKG_USING_MICROPYTHON'])
 group = group + DefineGroup('micropython/share', share_src, depend = [''])
 group = group + DefineGroup('micropython/extmod', extmod_src, depend = [''])
-group = group + DefineGroup('micropython/lib', lib_src, depend = [''])
 group = group + DefineGroup('micropython', src, depend = [''], CPPPATH = path, LOCAL_CCFLAGS = LOCAL_CCFLAGS, CPPDEFINES=CPPDEFINES)
 
 Return('group')

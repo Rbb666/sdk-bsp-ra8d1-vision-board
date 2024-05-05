@@ -403,13 +403,13 @@ MP_REGISTER_MODULE(MP_QSTR_deflate, mp_module_deflate);
 // Source files #include'd here to make sure they're compiled in
 // only if the module is enabled.
 
-//#include "lib/uzlib/tinflate.c"
-//#include "lib/uzlib/header.c"
-//#include "lib/uzlib/adler32.c"
-//#include "lib/uzlib/crc32.c"
+#include "lib/uzlib/tinflate.c"
+#include "lib/uzlib/header.c"
+#include "lib/uzlib/adler32.c"
+#include "lib/uzlib/crc32.c"
 
-//#if MICROPY_PY_DEFLATE_COMPRESS
-//#include "lib/uzlib/lz77.c"
-//#endif
+#if MICROPY_PY_DEFLATE_COMPRESS
+#include "lib/uzlib/lz77.c"
+#endif
 
 #endif // MICROPY_PY_DEFLATE

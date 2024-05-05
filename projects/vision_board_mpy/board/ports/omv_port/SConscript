@@ -10,8 +10,21 @@ src = Glob('omv_fs/*.c')
 src += Glob('omv_usb/*.c')
 src += Glob('omv_alloc/*.c')
 src += Glob('omv_framebuffer/*.c')
+src += Glob('omv_lcd/*.c')
 
-CPPDEFINES = ['ARM_MATH_CM85', '__FPU_PRESENT = 1']
+CPPDEFINES = [
+            '__VTOR_PRESENT = 1',
+            '__MPU_PRESENT = 1',
+            '__DSP_PRESENT = 1',
+            '__ICACHE_PRESENT = 1',
+            '__DCACHE_PRESENT = 1',
+            '__FPU_PRESENT = 1',
+            '__ARM_ARCH_8M_MAIN__ = 1',
+            '__ARM_ARCH_8_1M_MAIN__ = 1',
+            ]
+
+if GetDepend(['OPENMV_USING_LCD']):
+   CPPDEFINES += ['MICROPY_PY_DISPLAY = 1']
 
 objs = DefineGroup('openmv/rtt_port', src, depend = ['BSP_USING_OPENMV'], CPPPATH = CPPPATH, CPPDEFINES = CPPDEFINES)
 

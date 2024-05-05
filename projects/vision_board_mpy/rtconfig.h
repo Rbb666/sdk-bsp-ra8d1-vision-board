@@ -374,6 +374,7 @@
 
 /* OpenMV Extra Peripheral Configure */
 
+#define OPENMV_USING_LCD
 #define SENSOR_USING_XCLK
 #define CAM_PWM_DEV_NAME "pwm7"
 #define SENSOR_BUS_NAME "i2c1"

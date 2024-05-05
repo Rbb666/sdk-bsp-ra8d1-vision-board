@@ -1639,7 +1639,6 @@ __STATIC_FORCEINLINE void __set_FPSCR(uint32_t fpscr)
 */
 
 #if (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
-
 __STATIC_FORCEINLINE uint32_t __SADD8(uint32_t op1, uint32_t op2)
 {
   uint32_t result;

@@ -584,6 +584,15 @@ menu "Hardware Drivers Config"
     endmenu
 endmenu
 
+menuconfig PKG_TINYUSB_CONFIG
+        bool "Tinyusb Config"
+        default n
+        if PKG_TINYUSB_CONFIG
+            config PKG_TINYUSB_AUTO_INIT
+                bool "TinyUSB AUTO INIT flag"
+                default n
+        endif
+
 menuconfig PKG_TINYUSB_DEVICE_UVC
         bool "Using Communication Device Class (UVC)"
         default n

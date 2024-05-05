@@ -73,7 +73,7 @@ static void turn_on_lcd_backlight(void)
     /* turn on the LCD backlight */
     pwm_dev = (struct rt_device_pwm *)rt_device_find(LCD_PWM_DEV_NAME);
     /* pwm frequency:100K = 10000ns */
-    rt_pwm_set(pwm_dev, LCD_PWM_DEV_CHANNEL, 10000, 7000);
+    rt_pwm_set(pwm_dev, LCD_PWM_DEV_CHANNEL, 10000, 5000);
     rt_pwm_enable(pwm_dev, LCD_PWM_DEV_CHANNEL);
 #else
     rt_pin_mode(LCD_BL_PIN, PIN_MODE_OUTPUT);   /* LCD_BL */

@@ -124,14 +124,16 @@
 #define M_LN2		0.69314718055994530942f
 #define M_LN10		2.30258509299404568402f
 
-inline bool isinff(float arg)
+#define __FLT(x) (*(unsigned *)&(x))
+
+inline int isinff(float arg)
 {
-    return isinf(arg);
+    return (__FLT(arg) << 1) == 0xff000000;
 }
 
-inline bool isnanf(float arg)
+inline int isnanf(float arg)
 {
-    return isnan(arg);
+    return (0x7f800000 - (__FLT(arg) & 0x7fffffff)) >> 31;
 }
 
 #endif //__OMV_BOARDCONFIG_H__

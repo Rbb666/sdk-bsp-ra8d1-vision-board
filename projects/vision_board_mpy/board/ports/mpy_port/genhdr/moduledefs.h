@@ -16,6 +16,10 @@ extern const struct _mp_obj_module_t display_module;
 #undef MODULE_DEF_DISPLAY
 #define MODULE_DEF_DISPLAY { MP_ROM_QSTR(MP_QSTR_display), MP_ROM_PTR(&display_module) },
 
+extern const struct _mp_obj_module_t lcd_module;
+#undef MODULE_DEF_LCD
+#define MODULE_DEF_LCD { MP_ROM_QSTR(MP_QSTR_lcd), MP_ROM_PTR(&lcd_module) },
+
 extern const struct _mp_obj_module_t mp_module_errno;
 #undef MODULE_DEF_ERRNO
 #define MODULE_DEF_ERRNO { MP_ROM_QSTR(MP_QSTR_errno), MP_ROM_PTR(&mp_module_errno) },
@@ -68,10 +72,6 @@ extern const struct _mp_obj_module_t mp_module_time;
 #undef MODULE_DEF_TIME
 #define MODULE_DEF_TIME { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) },
 
-//extern const struct _mp_obj_module_t mp_module_websocket;
-//#undef MODULE_DEF_WEBSOCKET
-//#define MODULE_DEF_WEBSOCKET { MP_ROM_QSTR(MP_QSTR_websocket), MP_ROM_PTR(&mp_module_websocket) },
-
 extern const struct _mp_obj_module_t mp_module___main__;
 #undef MODULE_DEF___MAIN__
 #define MODULE_DEF___MAIN__ { MP_ROM_QSTR(MP_QSTR___main__), MP_ROM_PTR(&mp_module___main__) },
@@ -91,6 +91,10 @@ extern const struct _mp_obj_module_t mp_module_cmath;
 extern const struct _mp_obj_module_t mp_module_deflate;
 #undef MODULE_DEF_DEFLATE
 #define MODULE_DEF_DEFLATE { MP_ROM_QSTR(MP_QSTR_deflate), MP_ROM_PTR(&mp_module_deflate) },
+
+//extern const struct _mp_obj_module_t fir_module;
+//#undef MODULE_DEF_FIR
+//#define MODULE_DEF_FIR { MP_ROM_QSTR(MP_QSTR_fir), MP_ROM_PTR(&fir_module) },
 
 //extern const struct _mp_obj_module_t mp_module_framebuf;
 //#undef MODULE_DEF_FRAMEBUF
@@ -173,6 +177,7 @@ extern const struct _mp_obj_module_t ulab_user_cmodule;
     MODULE_DEF_BINASCII \
     MODULE_DEF_COLLECTIONS \
     MODULE_DEF_DISPLAY \
+	MODULE_DEF_LCD	\
     MODULE_DEF_ERRNO \
     MODULE_DEF_HASHLIB \
     MODULE_DEF_HEAPQ \

@@ -273,16 +273,10 @@ STATIC mp_uint_t machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uin
     return rt_device_write((struct rt_device *)(self->uart_device), -1, buf, size);
 }
 
-STATIC mp_uint_t machine_uart_ioctl(mp_obj_t obj, mp_uint_t request, uintptr_t arg, int *errcode)
-{
-    return NULL;
-}
-
 STATIC const mp_stream_p_t uart_stream_p =
 {
     .read = machine_uart_read,
     .write = machine_uart_write,
-    .ioctl = machine_uart_ioctl,
     .is_text = false,
 };
 

@@ -1,8 +1,8 @@
 #ifndef MICROPY_INCLUDED_MPCONFIGPORT_H
 #define MICROPY_INCLUDED_MPCONFIGPORT_H
 
-#include <stdint.h>
 #include <rtthread.h>
+#include <hal_data.h>
 
 // options to control how MicroPython is built
 // Config level
@@ -14,7 +14,7 @@
 #else
 #define MICROPY_GC_STACK_ENTRY_TYPE         uint16_t
 #endif
-#define MICROPY_ALLOC_PATH_MAX              (256)
+#define MICROPY_ALLOC_PATH_MAX              (128)
 
 // Optimisations
 
@@ -29,10 +29,11 @@
 #define MICROPY_ENABLE_GC                   (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
 #define MICROPY_LONGINT_IMPL                (MICROPY_LONGINT_IMPL_MPZ)
-#define MICROPY_FLOAT_IMPL                  (MICROPY_FLOAT_IMPL_FLOAT)
+#define MICROPY_FLOAT_IMPL                  (MICROPY_FLOAT_IMPL_DOUBLE)
 #define MICROPY_SCHEDULER_DEPTH             (8)
 #define MICROPY_SCHEDULER_STATIC_NODES      (1)
 #define MICROPY_ENABLE_SCHEDULER            (1)
+#define MICROPY_PY_SYS						(1)
 #define MICROPY_PY_THREAD                   (1)
 #define MICROPY_PY_THREAD_GIL				(1)
 #define MICROPY_MODULE_FROZEN_MPY			(0)
@@ -48,7 +49,6 @@
 /* rbbbb*/
 
 // Extended modules
-#define MICROPY_PY_TIME						(1)
 #define MICROPY_EPOCH_IS_1970               (1)
 #define MICROPY_PY_TIME_GMTIME_LOCALTIME_MKTIME (1)
 #define MICROPY_PY_TIME_TIME_TIME_NS        (1)

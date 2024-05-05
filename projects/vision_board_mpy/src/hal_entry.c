@@ -217,7 +217,7 @@ static void omv_init_func(void)
 void hal_entry(void)
 {
     LOG_I("===================================");
-    LOG_I("This is OpenMV4.1.0 demo");
+    LOG_I("This is OpenMV4.5.4 demo");
     LOG_I("===================================");
 
 #ifdef BSP_USING_OPENMV
