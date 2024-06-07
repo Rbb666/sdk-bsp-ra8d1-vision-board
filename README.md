@@ -45,6 +45,8 @@ $ sdk-bsp-ra8d1-vision-board
 │   ├── lvgl
 │   │   ├── vision_board_mipi_2.0inch_lvgl
 │   │   └── vision_board_rgb_4.3inch_lvgl
+│   ├── arm2d
+│   │   └── vision_board_mipi_2.0inch_arm2d
 │   ├── vision_board_blink_led
 │   ├── vision_board_camera
 │   ├── vision_board_openmv
