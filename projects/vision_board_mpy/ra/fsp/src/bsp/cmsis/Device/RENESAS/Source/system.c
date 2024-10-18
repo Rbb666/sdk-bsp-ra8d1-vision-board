@@ -28,7 +28,7 @@
  **********************************************************************************************************************/
 #include <string.h>
 #if defined(__GNUC__) && defined(__llvm__) && !defined(__ARMCC_VERSION) && !defined(__CLANG_TIDY__)
- #include <picotls.h>
+//  #include <picotls.h>
 #endif
 #include "bsp_api.h"
 

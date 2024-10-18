@@ -62,7 +62,7 @@ extern bool tinyusb_debug_enabled(void);
     #define MICROPY_HW_STDIN_BUFFER_LEN 512
 #endif
 
-STATIC uint8_t stdin_ringbuf_array[MICROPY_HW_STDIN_BUFFER_LEN];
+static uint8_t stdin_ringbuf_array[MICROPY_HW_STDIN_BUFFER_LEN];
 ringbuf_t stdin_ringbuf = {stdin_ringbuf_array, sizeof(stdin_ringbuf_array), 0, 0};
 #endif
 

@@ -26,6 +26,7 @@
 
 #define DMA_LENGTH_ALIGNMENT     (8)
 #define SENSOR_TIMEOUT_MS        (3000)
+#define MIN_EDMA_DST_INC         (4)
 
 // Sensor struct.
 sensor_t sensor = {};
@@ -127,9 +128,9 @@ int sensor_config(sensor_config_t config) {
 
         // Configure VSYNC, HSYNC and PIXCLK signals.
         CSI_REG_CR1(CSI) |= CSI_CR1_EXT_VSYNC_MASK;
-        CSI_REG_CR1(CSI) |= !sensor.hw_flags.vsync ? CSI_CR1_SOF_POL_MASK    : 0;
-        CSI_REG_CR1(CSI) |= !sensor.hw_flags.hsync ? CSI_CR1_HSYNC_POL_MASK  : 0;
-        CSI_REG_CR1(CSI) |= sensor.hw_flags.pixck ? CSI_CR1_REDGE_MASK      : 0;
+        CSI_REG_CR1(CSI) |= !sensor.vsync_pol ? CSI_CR1_SOF_POL_MASK    : 0;
+        CSI_REG_CR1(CSI) |= !sensor.hsync_pol ? CSI_CR1_HSYNC_POL_MASK  : 0;
+        CSI_REG_CR1(CSI) |= sensor.pixck_pol ? CSI_CR1_REDGE_MASK      : 0;
 
         // Stride config: No stride.
         CSI_REG_FBUF_PARA(CSI) = 0;
@@ -156,6 +157,7 @@ int sensor_abort(bool fifo_flush, bool in_irq) {
     CSI_DisableInterrupts(CSI, CSI_IRQ_FLAGS);
     CSI_REG_CR3(CSI) &= ~CSI_CR3_DMA_REQ_EN_RFF_MASK;
     CSI_REG_CR18(CSI) &= ~CSI_CR18_CSI_ENABLE_MASK;
+    dest_inc_size = 0;
     sensor.first_line = false;
     sensor.drop_frame = false;
     sensor.last_frame_ms = 0;
@@ -208,7 +210,7 @@ int sensor_dma_memcpy(void *dma, void *dst, void *src, int bpp, bool transposed)
     // beats. Additionally, the CSI hardware lacks cropping so we cannot align the source address.
     // Given this, performance will be lacking on cropped images. So much so that we do not use
     // the EDMA for anything less than 4-byte transfers otherwise you get sensor timeout errors.
-    if (dest_inc_size < 4) {
+    if (dest_inc_size < MIN_EDMA_DST_INC) {
         return -1;
     }
 
@@ -224,10 +226,18 @@ int sensor_dma_memcpy(void *dma, void *dst, void *src, int bpp, bool transposed)
                                MAIN_FB()->u * bpp, // bytesEachRequest
                                MAIN_FB()->u * bpp); // transferBytes
 
-    // Drop the frame if EDMA is not keeping up as the image will be corrupt.
-    if (EDMA_SubmitTransfer(handle, &config) != kStatus_Success) {
-        sensor.drop_frame = true;
-        return 0;
+    size_t retry = 3;
+    status_t status = kStatus_EDMA_Busy;
+    while (status == kStatus_EDMA_Busy) {
+        status = EDMA_SubmitTransfer(handle, &config);
+        if (status == kStatus_Success) {
+            break;
+        }
+        if (--retry == 0) {
+            // Drop the frame if EDMA is not keeping up as the image will be corrupt.
+            sensor.drop_frame = true;
+            return 0;
+        }
     }
 
     EDMA_TriggerChannelStart(handle->base, handle->channel);
@@ -247,7 +257,7 @@ void sensor_line_callback(uint32_t addr) {
             return;
         }
         bool jpeg_end = false;
-        if (sensor.hw_flags.jpeg_mode == 4) {
+        if (sensor.jpg_format == 4) {
             // JPEG MODE 4:
             //
             // The width and height are fixed in each frame. The first two bytes are valid data
@@ -277,7 +287,7 @@ void sensor_line_callback(uint32_t addr) {
                 }
                 buffer->offset += size;
             }
-        } else if (sensor.hw_flags.jpeg_mode == 3) {
+        } else if (sensor.jpg_format == 3) {
             // OV2640 JPEG TODO
         }
         // In JPEG mode the camera sensor will output some number of lines that doesn't match the
@@ -346,7 +356,7 @@ static void edma_config(sensor_t *sensor, uint32_t bytes_per_pixel) {
     uint32_t line_width_bytes = MAIN_FB()->u * bytes_per_pixel;
 
     // YUV422 Source -> Y Destination
-    if ((sensor->pixformat == PIXFORMAT_GRAYSCALE) && (sensor->hw_flags.gs_bpp == 2)) {
+    if ((sensor->pixformat == PIXFORMAT_GRAYSCALE) && (sensor->mono_bpp == 2)) {
         line_width_bytes /= 2;
     }
 
@@ -373,7 +383,7 @@ static void edma_config(sensor_t *sensor, uint32_t bytes_per_pixel) {
     }
 
     // YUV422 Source -> Y Destination
-    if ((sensor->pixformat == PIXFORMAT_GRAYSCALE) && (sensor->hw_flags.gs_bpp == 2)) {
+    if ((sensor->pixformat == PIXFORMAT_GRAYSCALE) && (sensor->mono_bpp == 2)) {
         src_inc = 2;
         src_size = 1;
     }
@@ -434,8 +444,8 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags) {
         }
         #endif
 
-        if ((sensor->pixformat == PIXFORMAT_RGB565 && sensor->hw_flags.rgb_swap)
-            || (sensor->pixformat == PIXFORMAT_YUV422 && sensor->hw_flags.yuv_swap)) {
+        if ((sensor->pixformat == PIXFORMAT_RGB565 && sensor->rgb_swap) ||
+            (sensor->pixformat == PIXFORMAT_YUV422 && sensor->yuv_swap)) {
             CSI_REG_CR1(CSI) |= CSI_CR1_SWAP16_EN_MASK | CSI_CR1_PACK_DIR_MASK;
         } else {
             CSI_REG_CR1(CSI) &= ~(CSI_CR1_SWAP16_EN_MASK | CSI_CR1_PACK_DIR_MASK);
@@ -455,12 +465,21 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags) {
 
     // Let the camera know we want to trigger it now.
     #if defined(OMV_CSI_FSYNC_PIN)
-    if (sensor->hw_flags.fsync) {
+    if (sensor->frame_sync) {
         omv_gpio_write(OMV_CSI_FSYNC_PIN, 1);
     }
     #endif
 
-    vbuffer_t *buffer = framebuffer_get_head(FB_NO_FLAGS);
+    framebuffer_flags_t fb_flags = FB_NO_FLAGS;
+
+    #if defined(OMV_CSI_DMA)
+    // dest_inc_size will be less than MIN_EDMA_DST_INC if the EDMA is not initialized or unusable.
+    if (dest_inc_size >= MIN_EDMA_DST_INC) {
+        fb_flags = FB_INVALIDATE;
+    }
+    #endif
+
+    vbuffer_t *buffer = framebuffer_get_head(fb_flags);
     // Wait for the DMA to finish the transfer.
     for (mp_uint_t ticks = mp_hal_ticks_ms(); buffer == NULL;) {
         MICROPY_EVENT_POLL_HOOK
@@ -468,19 +487,19 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags) {
             sensor_abort(true, false);
 
             #if defined(OMV_CSI_FSYNC_PIN)
-            if (sensor->hw_flags.fsync) {
+            if (sensor->frame_sync) {
                 omv_gpio_write(OMV_CSI_FSYNC_PIN, 0);
             }
             #endif
 
             return SENSOR_ERROR_CAPTURE_TIMEOUT;
         }
-        buffer = framebuffer_get_head(FB_NO_FLAGS);
+        buffer = framebuffer_get_head(fb_flags);
     }
 
     // We're done receiving data.
     #if defined(OMV_CSI_FSYNC_PIN)
-    if (sensor->hw_flags.fsync) {
+    if (sensor->frame_sync) {
         omv_gpio_write(OMV_CSI_FSYNC_PIN, 0);
     }
     #endif
@@ -508,12 +527,12 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags) {
             break;
         case PIXFORMAT_BAYER:
             MAIN_FB()->pixfmt = PIXFORMAT_BAYER;
-            MAIN_FB()->subfmt_id = sensor->hw_flags.bayer;
+            MAIN_FB()->subfmt_id = sensor->cfa_format;
             MAIN_FB()->pixfmt = imlib_bayer_shift(MAIN_FB()->pixfmt, MAIN_FB()->x, MAIN_FB()->y, sensor->transpose);
             break;
         case PIXFORMAT_YUV422: {
             MAIN_FB()->pixfmt = PIXFORMAT_YUV;
-            MAIN_FB()->subfmt_id = sensor->hw_flags.yuv_order;
+            MAIN_FB()->subfmt_id = sensor->yuv_format;
             MAIN_FB()->pixfmt = imlib_yuv_shift(MAIN_FB()->pixfmt, MAIN_FB()->x);
             break;
         }

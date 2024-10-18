@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <float.h>
+#define CMSIS_MCU_H "hal_data.h"
 #include CMSIS_MCU_H
 #include "arm_math.h"
 

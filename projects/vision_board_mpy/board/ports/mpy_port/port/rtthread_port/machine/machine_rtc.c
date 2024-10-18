@@ -46,15 +46,15 @@
 const mp_obj_type_t machine_rtc_type;
 
 // singleton RTC object
-STATIC const mp_obj_base_t machine_rtc_obj = {&machine_rtc_type};
+static const mp_obj_base_t machine_rtc_obj = {&machine_rtc_type};
 
-STATIC void error_check(bool status, const char *msg) {
+static void error_check(bool status, const char *msg) {
     if (!status) {
         nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, msg));
     }
 }
 
-STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+static mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
 #define MP_RTC_DEV_NAME "rtc"
     rt_device_t rtc_deivce = RT_NULL;
 
@@ -71,7 +71,7 @@ STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
     return (mp_obj_t)&machine_rtc_obj;
 }
 
-STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *args) {
     if (n_args == 1) {
         struct tm *tblock;
         time_t t;
@@ -110,17 +110,17 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
     }
 }
 
-STATIC mp_obj_t machine_rtc_now(mp_uint_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_rtc_now(mp_uint_t n_args, const mp_obj_t *args) {
     return machine_rtc_datetime_helper(1, args);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_now_obj, 0, 1, machine_rtc_now);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_now_obj, 0, 1, machine_rtc_now);
 
-STATIC mp_obj_t machine_rtc_init(mp_uint_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_rtc_init(mp_uint_t n_args, const mp_obj_t *args) {
     return machine_rtc_datetime_helper(n_args, args);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_init_obj, 1, 2, machine_rtc_init);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_init_obj, 1, 2, machine_rtc_init);
 
-STATIC mp_obj_t machine_rtc_deinit(mp_uint_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_rtc_deinit(mp_uint_t n_args, const mp_obj_t *args) {
     rt_err_t result;
     struct tm tblock;
 
@@ -136,14 +136,14 @@ STATIC mp_obj_t machine_rtc_deinit(mp_uint_t n_args, const mp_obj_t *args) {
     error_check(result == RT_EOK, "Set time error");
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_deinit_obj, 0, 1, machine_rtc_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_deinit_obj, 0, 1, machine_rtc_deinit);
 
-STATIC const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
+static const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_rtc_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_rtc_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_now), MP_ROM_PTR(&machine_rtc_now_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(machine_rtc_locals_dict, machine_rtc_locals_dict_table);
+static MP_DEFINE_CONST_DICT(machine_rtc_locals_dict, machine_rtc_locals_dict_table);
 
 const mp_obj_type_t machine_rtc_type = {
     { &mp_type_type },

@@ -60,7 +60,6 @@ int sensor_init(void)
 
     /* Set default color palette */
     sensor.color_palette = rainbow_table;
-    sensor.pwdn_pol = ACTIVE_HIGH;
 
     /* Disable VSYNC IRQ and callback */
     sensor_set_vsync_callback(NULL);
@@ -168,7 +167,7 @@ int sensor_set_windowing(int x, int y, int w, int h)
     MAIN_FB()->h = MAIN_FB()->v = h;
 
     /* Pickout a good buffer count for the user */
-    framebuffer_auto_adjust_buffers();
+    sensor_set_framebuffers(-1);
 
     return 0;
 }
@@ -257,36 +256,39 @@ int sensor_set_framesize(framesize_t framesize)
     sensor_abort(true, false);
 
     /* Flush previous frame */
+
     framebuffer_update_jpeg_buffer();
 
-    /* Call the sensor specific function */
-    if (sensor.set_framesize == NULL)
-    {
+    // Call the sensor specific function
+    if (sensor.set_framesize == NULL) {
         return SENSOR_ERROR_CTL_UNSUPPORTED;
     }
 
-    if (sensor.set_framesize(&sensor, framesize) != 0)
-    {
+    if (sensor.set_framesize(&sensor, framesize) != 0) {
         return SENSOR_ERROR_CTL_FAILED;
     }
 
-    /* wait for the camera to settle */
-    mp_hal_delay_ms(100);
+    if (!sensor.disable_delays) {
+        mp_hal_delay_ms(100); // wait for the camera to settle
+    }
 
-    /* Set framebuffer size */
+    // Set framebuffer size
     sensor.framesize = framesize;
 
-    /* Skip the first frame */
-    MAIN_FB()->pixfmt = PIXFORMAT_INVALID;
-
-    /* Set MAIN FB x offset, y offset, width, height, backup width, and backup height */
+    // Set x and y offsets.
     MAIN_FB()->x = 0;
     MAIN_FB()->y = 0;
-    MAIN_FB()->w = MAIN_FB()->u = resolution[framesize][0];
-    MAIN_FB()->h = MAIN_FB()->v = resolution[framesize][1];
+    // Set width and height.
+    MAIN_FB()->w = resolution[framesize][0];
+    MAIN_FB()->h = resolution[framesize][1];
+    // Set backup width and height.
+    MAIN_FB()->u = resolution[framesize][0];
+    MAIN_FB()->v = resolution[framesize][1];
+    // Reset pixel format to skip the first frame.
+    MAIN_FB()->pixfmt = PIXFORMAT_INVALID;
 
-    /* Pickout a good buffer count for the user */
-    framebuffer_auto_adjust_buffers();
+    // Auto-adjust the number of frame buffers.
+    sensor_set_framebuffers(-1);
 
     return 0;
 }
@@ -362,7 +364,7 @@ static int ceu_device_snapshot(void *buffer)
 int write_raw_yuyv_to_gray(sensor_t *sensor, uint8_t *out, const uint8_t *in, size_t len)
 {
     // YUV to Grayscale
-    if (sensor->hw_flags.gs_bpp == 2)
+    if (sensor->mono_bpp == 2)
     {
         size_t end = len / 8;
         for (size_t i = 0; i < end; ++i)
@@ -461,14 +463,13 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags)
         break;
     case PIXFORMAT_BAYER:
         MAIN_FB()->pixfmt = PIXFORMAT_BAYER;
-        MAIN_FB()->subfmt_id = sensor->hw_flags.bayer;
+        MAIN_FB()->subfmt_id = sensor->cfa_format;
         break;
     case PIXFORMAT_YUV422:
     {
-        bool yuv_order = sensor->hw_flags.yuv_order == SENSOR_HW_FLAGS_YUV422;
-        int even = yuv_order ? PIXFORMAT_YUV422 : PIXFORMAT_YVU422;
-        int odd = yuv_order ? PIXFORMAT_YVU422 : PIXFORMAT_YUV422;
-        MAIN_FB()->pixfmt = (MAIN_FB()->x % 2) ? odd : even;
+        MAIN_FB()->pixfmt = PIXFORMAT_YUV;
+        MAIN_FB()->subfmt_id = sensor->yuv_format;
+        MAIN_FB()->pixfmt = imlib_yuv_shift(MAIN_FB()->pixfmt, MAIN_FB()->x);
         break;
     }
     case PIXFORMAT_JPEG:
@@ -490,8 +491,8 @@ int sensor_snapshot(sensor_t *sensor, image_t *image, uint32_t flags)
     }
 
     /* Swap bytes if set */
-    if ((MAIN_FB()->pixfmt == PIXFORMAT_RGB565 && sensor->hw_flags.rgb_swap) ||     \
-            (MAIN_FB()->pixfmt == PIXFORMAT_YUV422 && sensor->hw_flags.yuv_swap))   \
+    if ((MAIN_FB()->pixfmt == PIXFORMAT_RGB565 && sensor->rgb_swap) ||     \
+            (MAIN_FB()->pixfmt == PIXFORMAT_YUV422 && sensor->yuv_swap))   \
     {
         unaligned_memcpy_rev16(buffer->data, buffer->data, w * h);
     }

@@ -15,8 +15,8 @@
 #include "hal_data.h"
 
 // Architecture info
-#define OMV_BOARD_ARCH			"RTT&RA8" // OMV4 H7 PRO 32768 SDRAM
-#define OMV_BOARD_TYPE          "M4"
+#define OMV_BOARD_ARCH			"OPENMVPT 65536 SDRAM" // OMV4 H7 PRO 32768 SDRAM
+#define OMV_BOARD_TYPE          "H7"
 
 #define OMV_BOARD_UID_ADDR      0x03008190
 #define OMV_UNIQUE_ID_SIZE      3 // 3 words
@@ -124,8 +124,8 @@
 #define M_LN2		0.69314718055994530942f
 #define M_LN10		2.30258509299404568402f
 
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 #define __FLT(x) (*(unsigned *)&(x))
-
 inline int isinff(float arg)
 {
     return (__FLT(arg) << 1) == 0xff000000;
@@ -135,5 +135,6 @@ inline int isnanf(float arg)
 {
     return (0x7f800000 - (__FLT(arg) & 0x7fffffff)) >> 31;
 }
+#endif
 
 #endif //__OMV_BOARDCONFIG_H__

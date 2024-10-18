@@ -1,5 +1,5 @@
-from building import *
 import rtconfig
+from building import *
 
 group = []
 
@@ -31,6 +31,9 @@ extmod_src  += Glob('extmod/modasyncio.c')
 extmod_src  += Glob('extmod/moddeflate.c')
 extmod_src  += Glob('extmod/machine_mem.c')
 extmod_src  += Glob('extmod/machine_pulse.c')
+extmod_src  += Glob('extmod/vfs.c')
+extmod_src  += Glob('extmod/vfs_reader.c')
+extmod_src  += Glob('extmod/vfs_posix_file.c')
 
 SrcRemove(share_src, ['shared/runtime/gchelper_generic.c'])
 SrcRemove(share_src, ['shared/runtime/softtimer.c'])
@@ -45,7 +48,7 @@ path   += [cwd + '/extmod']
 path   += [cwd + '/lib/uzlib']
 
 LOCAL_CCFLAGS = ''
-CPPDEFINES = ['MICROPY_PY_SENSOR = 1']
+CPPDEFINES = ['MICROPY_PY_SENSOR=1']
 CPPDEFINES += ['NDEBUG']
 
 if rtconfig.PLATFORM in ['gcc', 'armclang'] :

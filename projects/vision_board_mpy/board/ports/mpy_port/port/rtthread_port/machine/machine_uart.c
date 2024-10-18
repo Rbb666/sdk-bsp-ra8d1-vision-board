@@ -48,7 +48,7 @@ typedef struct _machine_uart_obj_t
     struct rt_serial_device *uart_device;
 } machine_uart_obj_t;
 
-STATIC void machine_uart_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
+static void machine_uart_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
 {
     machine_uart_obj_t *self = (machine_uart_obj_t *) self_in;
     mp_printf(print, "uart( device port : %s,baud_rate = %d, data_bits = %d, parity = %d, stop_bits = %d )",
@@ -59,7 +59,7 @@ STATIC void machine_uart_print(const mp_print_t *print, mp_obj_t self_in, mp_pri
               self->uart_device->config.stop_bits);
 }
 
-STATIC mp_obj_t machine_uart_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args)
+static mp_obj_t machine_uart_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args)
 {
     mp_arg_check_num(n_args, n_kw, 1, MP_OBJ_FUN_ARGS_MAX, true);
     char uart_dev_name[RT_NAME_MAX];
@@ -100,7 +100,7 @@ STATIC mp_obj_t machine_uart_make_new(const mp_obj_type_t *type, size_t n_args, 
 ///   - `flow` is RTS | CTS where RTS == 256, CTS == 512
 ///   - `read_buf_len` is the character length of the read buffer (0 to disable).
 ///
-STATIC mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
+static mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 {
     static const mp_arg_t allowed_args[] =
     {
@@ -184,22 +184,22 @@ STATIC mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args
 }
 
 
-STATIC mp_obj_t machine_uart_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args)
+static mp_obj_t machine_uart_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args)
 {
     return machine_uart_init_helper(args[0], n_args - 1, args + 1, kw_args);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_uart_init_obj, 1, machine_uart_init);
+static MP_DEFINE_CONST_FUN_OBJ_KW(machine_uart_init_obj, 1, machine_uart_init);
 
-STATIC mp_obj_t machine_uart_deinit(mp_obj_t self_in)
+static mp_obj_t machine_uart_deinit(mp_obj_t self_in)
 {
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_deinit_obj, machine_uart_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_deinit_obj, machine_uart_deinit);
 
 #if MICROPY_PY_MACHINE_UART_READCHAR_WRITECHAR
 #define RETRY_TIMES 500
 
-STATIC mp_obj_t machine_uart_writechar(mp_obj_t self_in, mp_obj_t char_in)
+static mp_obj_t machine_uart_writechar(mp_obj_t self_in, mp_obj_t char_in)
 {
     machine_uart_obj_t *self = self_in;
     uint16_t data = mp_obj_get_int(char_in);
@@ -214,9 +214,9 @@ STATIC mp_obj_t machine_uart_writechar(mp_obj_t self_in, mp_obj_t char_in)
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_uart_writechar_obj, machine_uart_writechar);
+static MP_DEFINE_CONST_FUN_OBJ_2(machine_uart_writechar_obj, machine_uart_writechar);
 
-STATIC mp_obj_t machine_uart_readchar(mp_obj_t self_in)
+static mp_obj_t machine_uart_readchar(mp_obj_t self_in)
 {
     machine_uart_obj_t *self = self_in;
     rt_uint8_t ch;
@@ -228,10 +228,10 @@ STATIC mp_obj_t machine_uart_readchar(mp_obj_t self_in)
 
     return MP_OBJ_NEW_SMALL_INT(-1);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_readchar_obj, machine_uart_readchar);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_readchar_obj, machine_uart_readchar);
 #endif
 
-STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] =
+static const mp_rom_map_elem_t machine_uart_locals_dict_table[] =
 {
     // instance methods
 
@@ -253,9 +253,9 @@ STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] =
     { MP_ROM_QSTR(MP_QSTR_writechar), MP_ROM_PTR(&machine_uart_writechar_obj) },
     #endif
 };
-STATIC MP_DEFINE_CONST_DICT(machine_uart_locals_dict, machine_uart_locals_dict_table);
+static MP_DEFINE_CONST_DICT(machine_uart_locals_dict, machine_uart_locals_dict_table);
 
-STATIC mp_uint_t machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t size, int *errcode)
+static mp_uint_t machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t size, int *errcode)
 {
     machine_uart_obj_t *self = self_in;
     byte *buf = buf_in;
@@ -264,7 +264,7 @@ STATIC mp_uint_t machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t siz
     return rt_device_read((struct rt_device *)(self->uart_device), -1, buf, size);
 }
 
-STATIC mp_uint_t machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uint_t size, int *errcode)
+static mp_uint_t machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uint_t size, int *errcode)
 {
     machine_uart_obj_t *self = self_in;
     const byte *buf = buf_in;
@@ -273,7 +273,7 @@ STATIC mp_uint_t machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uin
     return rt_device_write((struct rt_device *)(self->uart_device), -1, buf, size);
 }
 
-STATIC const mp_stream_p_t uart_stream_p =
+static const mp_stream_p_t uart_stream_p =
 {
     .read = machine_uart_read,
     .write = machine_uart_write,

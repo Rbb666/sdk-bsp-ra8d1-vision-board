@@ -53,9 +53,9 @@ typedef struct _thread_t {
 } thread_t;
 
 // the mutex controls access to the linked list
-STATIC mp_thread_mutex_t thread_mutex;
-STATIC thread_t thread_root_node;
-STATIC thread_t *thread_root; // root pointer, handled by mp_thread_gc_others
+static mp_thread_mutex_t thread_mutex;
+static thread_t thread_root_node;
+static thread_t *thread_root; // root pointer, handled by mp_thread_gc_others
 
 /**
  * thread port initialization

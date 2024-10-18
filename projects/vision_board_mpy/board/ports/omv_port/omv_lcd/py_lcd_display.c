@@ -43,7 +43,8 @@ static mp_obj_t py_lcd_deinit(void)
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_deinit_obj, py_lcd_deinit);
+
+static MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_deinit_obj, py_lcd_deinit);
 
 static mp_obj_t py_lcd_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args)
 {
@@ -64,28 +65,28 @@ static mp_obj_t py_lcd_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_ar
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_init_obj, 0, py_lcd_init);
+static MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_init_obj, 0, py_lcd_init);
 
 static mp_obj_t py_lcd_width()
 {
     if (type == LCD_NONE) return mp_const_none;
     return mp_obj_new_int(width);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_width_obj, py_lcd_width);
+static MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_width_obj, py_lcd_width);
 
 static mp_obj_t py_lcd_height()
 {
     if (type == LCD_NONE) return mp_const_none;
     return mp_obj_new_int(height);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_height_obj, py_lcd_height);
+static MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_height_obj, py_lcd_height);
 
 static mp_obj_t py_lcd_type()
 {
     if (type == LCD_NONE) return mp_const_none;
     return mp_obj_new_int(type);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_type_obj, py_lcd_type);
+static MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_type_obj, py_lcd_type);
 
 static mp_obj_t py_lcd_set_backlight(mp_obj_t state_obj)
 {
@@ -107,9 +108,9 @@ static mp_obj_t py_lcd_set_backlight(mp_obj_t state_obj)
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_lcd_set_backlight_obj, py_lcd_set_backlight);
+static MP_DEFINE_CONST_FUN_OBJ_1(py_lcd_set_backlight_obj, py_lcd_set_backlight);
 
-STATIC mp_obj_t py_lcd_display(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+static mp_obj_t py_lcd_display(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
 {
     image_t *arg_img = py_image_cobj(args[0]);
 
@@ -143,7 +144,7 @@ STATIC mp_obj_t py_lcd_display(uint n_args, const mp_obj_t *args, mp_map_t *kw_a
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_display_obj, 1, py_lcd_display);
+static MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_display_obj, 1, py_lcd_display);
 
 static mp_obj_t py_lcd_clear(uint n_args, const mp_obj_t *args)
 {
@@ -157,7 +158,7 @@ static mp_obj_t py_lcd_clear(uint n_args, const mp_obj_t *args)
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_clear_obj, 0, 1, py_lcd_clear);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_clear_obj, 0, 1, py_lcd_clear);
 
 static const mp_map_elem_t globals_dict_table[] =
 {
@@ -172,7 +173,7 @@ static const mp_map_elem_t globals_dict_table[] =
     { MP_OBJ_NEW_QSTR(MP_QSTR_clear), (mp_obj_t) &py_lcd_clear_obj         },
     { NULL, NULL },
 };
-STATIC MP_DEFINE_CONST_DICT(globals_dict, globals_dict_table);
+static MP_DEFINE_CONST_DICT(globals_dict, globals_dict_table);
 
 const mp_obj_module_t lcd_module =
 {

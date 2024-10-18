@@ -56,7 +56,7 @@ void get_unique_id(uint8_t *id)
     p[3] = uniqueid[3];
 }
 
-STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args)
+static mp_obj_t machine_info(size_t n_args, const mp_obj_t *args)
 {
 #ifdef RT_USING_FINSH
     extern long list_thread(void);
@@ -115,7 +115,7 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args)
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
-STATIC mp_obj_t machine_unique_id(void)
+static mp_obj_t machine_unique_id(void)
 {
     //TODO
     uint8_t id[16];
@@ -124,14 +124,14 @@ STATIC mp_obj_t machine_unique_id(void)
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_unique_id_obj, machine_unique_id);
 
-STATIC mp_obj_t machine_reset(void)
+static mp_obj_t machine_reset(void)
 {
     //TODO
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_obj, machine_reset);
 
-STATIC mp_obj_t machine_soft_reset(void)
+static mp_obj_t machine_soft_reset(void)
 {
     pyexec_system_exit = PYEXEC_FORCED_EXIT;
     nlr_raise(mp_obj_new_exception(&mp_type_SystemExit));
@@ -149,7 +149,7 @@ rt_weak int mp_port_get_freq(int clkid, int *freq)
 }
 
 #if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
-STATIC mp_obj_t machine_freq(void)
+static mp_obj_t machine_freq(void)
 {
     int i;
     mp_obj_list_t *ret_list = m_new(mp_obj_list_t, 1);
@@ -169,7 +169,7 @@ STATIC mp_obj_t machine_freq(void)
 MP_DEFINE_CONST_FUN_OBJ_0(machine_freq_obj, machine_freq);
 #endif
 
-STATIC mp_obj_t pyb_wfi(void)
+static mp_obj_t pyb_wfi(void)
 {
     //TODO __WFI();
     return mp_const_none;
@@ -177,14 +177,14 @@ STATIC mp_obj_t pyb_wfi(void)
 MP_DEFINE_CONST_FUN_OBJ_0(pyb_wfi_obj, pyb_wfi);
 
 static rt_base_t int_lvl;
-STATIC mp_obj_t pyb_disable_irq(void)
+static mp_obj_t pyb_disable_irq(void)
 {
     int_lvl = rt_hw_interrupt_disable();
     return mp_obj_new_bool(1);
 }
 MP_DEFINE_CONST_FUN_OBJ_0(pyb_disable_irq_obj, pyb_disable_irq);
 
-STATIC mp_obj_t pyb_enable_irq(size_t n_args, const mp_obj_t *arg)
+static mp_obj_t pyb_enable_irq(size_t n_args, const mp_obj_t *arg)
 {
     if (n_args == 0)
     {
@@ -205,7 +205,7 @@ STATIC mp_obj_t pyb_enable_irq(size_t n_args, const mp_obj_t *arg)
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(pyb_enable_irq_obj, 0, 1, pyb_enable_irq);
 
-STATIC mp_obj_t machine_sleep(void)
+static mp_obj_t machine_sleep(void)
 {
     //TODO
     return mp_const_none;
@@ -213,7 +213,7 @@ STATIC mp_obj_t machine_sleep(void)
 MP_DEFINE_CONST_FUN_OBJ_0(machine_sleep_obj, machine_sleep);
 
 #if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
-STATIC mp_obj_t machine_deepsleep(void)
+static mp_obj_t machine_deepsleep(void)
 {
     //TODO
     return mp_const_none;
@@ -222,15 +222,15 @@ MP_DEFINE_CONST_FUN_OBJ_0(machine_deepsleep_obj, machine_deepsleep);
 #endif
 
 #if MICROPY_PY_MACHINE_BARE_METAL_FUNCS
-STATIC mp_obj_t machine_reset_cause(void)
+static mp_obj_t machine_reset_cause(void)
 {
     //TODO
     return MP_OBJ_NEW_SMALL_INT(42);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
+static MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
 #endif
 
-STATIC const mp_rom_map_elem_t machine_module_globals_table[] =
+static const mp_rom_map_elem_t machine_module_globals_table[] =
 {
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
 
@@ -297,7 +297,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] =
 #endif
 };
 
-STATIC MP_DEFINE_CONST_DICT(machine_module_globals, machine_module_globals_table);
+static MP_DEFINE_CONST_DICT(machine_module_globals, machine_module_globals_table);
 
 const mp_obj_module_t mp_module_machine =
 {

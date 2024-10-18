@@ -10,6 +10,7 @@ imlib_src = Glob('src/omv/imlib/*.c')
 alloc_src = Glob('src/omv/alloc/*.c')
 common_src = Glob('src/omv/common/*.c')
 modules_src = Glob('src/omv/modules/*.c')
+tf_src = []
 
 dsp_src = Glob('src/hal/cmsis/src/dsp/CommonTables/CommonTables.c')
 dsp_src += Glob('src/hal/cmsis/src/dsp/FastMathFunctions/FastMathFunctions.c')
@@ -21,6 +22,7 @@ ulab_src += Glob('src/omv/modules/ulab/code/numpy/carray/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/numpy/fft/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/numpy/linalg/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/numpy/ndarray/*.c')
+ulab_src += Glob('src/omv/modules/ulab/code/numpy//random/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/numpy/io/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/user/*.c')
 ulab_src += Glob('src/omv/modules/ulab/code/utils/*.c')
@@ -53,8 +55,8 @@ SrcRemove(modules_src, ['src/omv/modules/py_tfp410.c'])
 SrcRemove(modules_src, ['src/omv/modules/py_tof.c'])
 SrcRemove(modules_src, ['src/omv/modules/py_tv.c'])
 
-if not GetDepend(['OMV_ENABLE_TF']):
-    SrcRemove(modules_src, ['src/omv/modules/py_tf.c'])
+if GetDepend(['OMV_ENABLE_TF']):
+    tf_src += Glob('src/lib/tflm/tflm_backend.cpp')
 
 path = [cwd + '/']
 path += [cwd + '/src/hal']
@@ -76,6 +78,7 @@ path += [cwd + '/src/omv/modules/ulab/code/numpy/fft']
 path += [cwd + '/src/omv/modules/ulab/code/numpy/linalg']
 path += [cwd + '/src/omv/modules/ulab/code/numpy/ndarray']
 path += [cwd + '/src/omv/modules/ulab/code/numpy/io']
+path += [cwd + '/src/omv/modules/ulab/code/numpy/random']
 path += [cwd + '/src/omv/modules/ulab/code/scipy/linalg']
 path += [cwd + '/src/omv/modules/ulab/code/scipy/optimize']
 path += [cwd + '/src/omv/modules/ulab/code/scipy/signal']
@@ -90,7 +93,37 @@ if rtconfig.PLATFORM in ['gcc', 'armclang']:
 elif rtconfig.PLATFORM == 'armcc':
     LOCAL_CCFLAGS += ' --c99 --gnu'
 
-CPPDEFINES = ['CMSIS_MCU_H=<hal_data.h>']
+# Extra module flags.
+CPPFLAGS = '-std=c++11'
+CPPFLAGS += '-fno-rtti'
+CPPFLAGS += '-fno-exceptions'
+CPPFLAGS += '-fno-use-cxa-atexit'
+CPPFLAGS += '-nodefaultlibs'
+CPPFLAGS += '-fno-unwind-tables'
+CPPFLAGS += '-fpermissive'
+CPPFLAGS += '-fmessage-length=0'
+CPPFLAGS += '-fno-threadsafe-statics'
+CPPFLAGS += '-Wno-double-promotion'
+CPPFLAGS += '-Wno-float-conversion'
+CPPFLAGS += '-DTF_LITE_STATIC_MEMORY'
+CPPFLAGS += '-DTF_LITE_DISABLE_X86_NEON'
+CPPFLAGS += '-DKERNELS_OPTIMIZED_FOR_SPEED'
+CPPFLAGS += '-DTF_LITE_STRIP_ERROR_STRINGS'
+
+CFLAGS = ' -DOMV_DEBUG_PRINTF'
+CFLAGS += ' -DFB_ALLOC_STATS'
+CFLAGS += ' -DOMV_PROFILE_ENABLE=1'
+
+rtconfig.CXXFLAGS.replace('-std=gnu99', "")
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    LIBS = ['tflm-cortex-m7+fp-release']     
+    LIBPATH = [os.path.join(GetCurrentDir(), 'src/lib/tflm/libtflm/lib')] 
+
+path += [cwd + '/src/lib/tflm/libtflm/include/']
+path += [cwd + '/src/lib/tflm/libtflm/include/third_party/']
+path += [cwd + '/src/lib/tflm/libtflm/include/third_party/gemmlowp/']
+path += [cwd + '/src/lib/tflm/libtflm/include/third_party/flatbuffers/include/']
 
 group = group + DefineGroup('openmv/alloc', alloc_src, depend = ['BSP_USING_OPENMV'])
 group = group + DefineGroup('openmv/common', common_src, depend = ['BSP_USING_OPENMV'])
@@ -100,6 +133,14 @@ group = group + DefineGroup('openmv/ulab', ulab_src, depend = ['BSP_USING_OPENMV
 group = group + DefineGroup('openmv/ulab/scipy', ulab_scipy_src, depend = ['BSP_USING_OPENMV'])
 group = group + DefineGroup('openmv/port/ra8', port_src, depend = ['BSP_USING_OPENMV'])
 group = group + DefineGroup('openmv/sensor', sensor_src, depend = ['BSP_USING_OPENMV'])
-group = group + DefineGroup('openmv/imlib', imlib_src, depend = ['BSP_USING_OPENMV'], CPPPATH = path, LOCAL_CCFLAGS = LOCAL_CCFLAGS, CPPDEFINES = CPPDEFINES)
+group = group + DefineGroup('openmv/tf', tf_src, depend = ['BSP_USING_OPENMV', 'OMV_ENABLE_TF'])
+group = group + DefineGroup('openmv/imlib', imlib_src, depend = ['BSP_USING_OPENMV'],
+                            LOCAL_CCFLAGS = LOCAL_CCFLAGS,
+                            CPPPATH = path,
+                            CFLAGS = CFLAGS,
+                            CXXFLAGS = CPPFLAGS,
+                            LIBS = LIBS,
+                            LIBPATH = LIBPATH)
 
 Return('group')
+ 

@@ -20,12 +20,13 @@
 #include "tusb.h"
 #include "usbdbg.h"
 #include "tinyusb_debug.h"
+#include "omv_common.h"
 
-#define DEBUG_MAX_PACKET       (OMV_TUSBDBG_PACKET)
-#define DEBUG_BAUDRATE_SLOW    (921600)
-#define DEBUG_BAUDRATE_FAST    (12000000)
+#define DEBUG_BAUDRATE_SLOW     (921600)
+#define DEBUG_BAUDRATE_FAST     (12000000)
+#define DEBUG_EP_SIZE           (TUD_OPT_HIGH_SPEED ? 512 : 64)
 
-extern void __fatal_error();
+void NORETURN __fatal_error(const char *msg);
 
 typedef struct __attribute__((packed)) {
     uint8_t cmd;
@@ -34,24 +35,39 @@ typedef struct __attribute__((packed)) {
 }
 usbdbg_cmd_t;
 
-static uint8_t debug_ringbuf_array[512];
+static uint8_t tx_array[OMV_TUSBDBG_BUFFER];
+static ringbuf_t tx_ringbuf = { tx_array, sizeof(tx_array) };
 static volatile bool tinyusb_debug_mode = false;
-ringbuf_t debug_ringbuf = { debug_ringbuf_array, sizeof(debug_ringbuf_array) };
 
 uint32_t usb_cdc_buf_len() {
-    return ringbuf_avail((ringbuf_t *) &debug_ringbuf);
+    return ringbuf_avail(&tx_ringbuf);
 }
 
 uint32_t usb_cdc_get_buf(uint8_t *buf, uint32_t len) {
-    for (int i = 0; i < len; i++) {
-        buf[i] = ringbuf_get((ringbuf_t *) &debug_ringbuf);
+    // Read all of the request bytes.
+    if (ringbuf_get_bytes(&tx_ringbuf, buf, len) == 0) {
+        return len;
     }
-    return len;
+    // Try to read as much data as possible.
+    uint32_t bytes = 0;
+    for (; bytes < len; bytes++) {
+        int c = ringbuf_get(&tx_ringbuf);
+        if (c == -1) {
+            break;
+        }
+        buf[bytes] = c;
+    }
+    return bytes;
+}
+
+void usb_cdc_reset_buffers(void) {
+    tx_ringbuf.iget = 0;
+    tx_ringbuf.iput = 0;
 }
 
 void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const *coding) {
-    debug_ringbuf.iget = 0;
-    debug_ringbuf.iput = 0;
+    tx_ringbuf.iget = 0;
+    tx_ringbuf.iput = 0;
 
     if (0) {
         #if defined(MICROPY_BOARD_ENTER_BOOTLOADER)
@@ -70,24 +86,44 @@ bool tinyusb_debug_enabled(void) {
     return tinyusb_debug_mode;
 }
 
+extern void __real_mp_usbd_task(void);
+void __wrap_mp_usbd_task(void) {
+    if (!tinyusb_debug_enabled()) {
+        __real_mp_usbd_task();
+    }
+}
+
 extern void __real_tud_cdc_rx_cb(uint8_t itf);
 void __wrap_tud_cdc_rx_cb(uint8_t itf) {
-    if (tinyusb_debug_enabled()) {
-        return;
-    } else {
+    if (!tinyusb_debug_enabled()) {
         __real_tud_cdc_rx_cb(itf);
     }
+}
+
+extern uintptr_t __real_mp_hal_stdio_poll(uintptr_t poll_flags);
+uintptr_t __wrap_mp_hal_stdio_poll(uintptr_t poll_flags) {
+    if (!tinyusb_debug_enabled()) {
+        return __real_mp_hal_stdio_poll(poll_flags);
+    }
+    return 0;
 }
 
 extern mp_uint_t __real_mp_hal_stdout_tx_strn(const char *str, mp_uint_t len);
 mp_uint_t __wrap_mp_hal_stdout_tx_strn(const char *str, mp_uint_t len) {
     if (tinyusb_debug_enabled()) {
         if (tud_cdc_connected()) {
+            NVIC_DisableIRQ(PendSV_IRQn);
             for (int i = 0; i < len; i++) {
-                NVIC_DisableIRQ(PendSV_IRQn);
-                ringbuf_put((ringbuf_t *) &debug_ringbuf, str[i]);
-                NVIC_EnableIRQ(PendSV_IRQn);
+                // The ring buffer overflows occasionally, espcially when using a slow poll
+                // rate and fast print rate. When this happens, reset the buffer and start
+                // over, if this string fits entirely in the buffer. This helps the ring buffer
+                // self-recover from broken strings.
+                if (ringbuf_put(&tx_ringbuf, str[i]) == -1 && len <= tx_ringbuf.size) {
+                    tx_ringbuf.iget = 0;
+                    tx_ringbuf.iput = 0;
+                }
             }
+            NVIC_EnableIRQ(PendSV_IRQn);
         }
         return len;
     } else {
@@ -102,20 +138,16 @@ static void tinyusb_debug_task(void) {
         return;
     }
 
-    uint8_t dbg_buf[DEBUG_MAX_PACKET];
-    uint32_t count = tud_cdc_read(dbg_buf, 6);
+    usbdbg_cmd_t cmd;
+    tud_cdc_read(&cmd, sizeof(cmd));
 
-    if (count < 6 || dbg_buf[0] != 0x30) {
-        // Maybe we should try to recover from this state
-        // but for now, call __fatal_error which doesn't
-        // return.
-        __fatal_error();
-        return;
+    if (cmd.cmd != 0x30) {
+        // TODO: Try to recover from this state but for now, call __fatal_error.
+        __fatal_error("Invalid USB CMD received.");
     }
 
-    usbdbg_cmd_t *cmd = (usbdbg_cmd_t *) dbg_buf;
-    uint8_t request = cmd->request;
-    uint32_t xfer_length = cmd->xfer_length;
+    uint8_t request = cmd.request;
+    uint32_t xfer_length = cmd.xfer_length;
     usbdbg_control(NULL, request, xfer_length);
 
     while (xfer_length) {
@@ -125,19 +157,21 @@ static void tinyusb_debug_task(void) {
         }
         if (request & 0x80) {
             // Device-to-host data phase
-            int bytes = MIN(xfer_length, DEBUG_MAX_PACKET);
-            if (bytes <= tud_cdc_write_available()) {
-                xfer_length -= bytes;
-                usbdbg_data_in(dbg_buf, bytes);
-                tud_cdc_write(dbg_buf, bytes);
+            int size = OMV_MIN(xfer_length, tud_cdc_write_available());
+            if (size) {
+                xfer_length -= size;
+                usbdbg_data_in(size, tud_cdc_write);
             }
-            tud_cdc_write_flush();
+            if (size > 0 && size < DEBUG_EP_SIZE) {
+                tud_cdc_write_flush();
+            }
         } else {
             // Host-to-device data phase
-            int bytes = MIN(xfer_length, DEBUG_MAX_PACKET);
-            uint32_t count = tud_cdc_read(dbg_buf, bytes);
-            xfer_length -= count;
-            usbdbg_data_out(dbg_buf, count);
+            int size = OMV_MIN(xfer_length, tud_cdc_available());
+            if (size) {
+                xfer_length -= size;
+                usbdbg_data_out(size, tud_cdc_read);
+            }
         }
     }
 }

@@ -41,7 +41,7 @@ typedef struct _machine_lcd_obj_t {
     mp_obj_base_t base;
 } machine_lcd_obj_t;
 
-STATIC void error_check(bool status, const char *msg) {
+static void error_check(bool status, const char *msg) {
     if (!status) {
         nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, msg));
     }
@@ -50,7 +50,7 @@ STATIC void error_check(bool status, const char *msg) {
 /// \classmethod \constructor(skin_position)
 ///
 /// Construct an LCD object.  
-STATIC mp_obj_t machine_lcd_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     // check arguments
     mp_arg_check_num(n_args, n_kw, 0, 0, false);
     
@@ -64,7 +64,7 @@ STATIC mp_obj_t machine_lcd_make_new(const mp_obj_type_t *type, size_t n_args, s
 /// \method light(value)
 ///
 /// Turn the backlight on/off.  True or 1 turns it on, False or 0 turns it off.
-STATIC mp_obj_t machine_lcd_light(mp_obj_t self_in, mp_obj_t value) {
+static mp_obj_t machine_lcd_light(mp_obj_t self_in, mp_obj_t value) {
     if (mp_obj_is_true(value)) {
         lcd_display_on(); // set pin high to turn backlight on
     } else {
@@ -72,25 +72,25 @@ STATIC mp_obj_t machine_lcd_light(mp_obj_t self_in, mp_obj_t value) {
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_lcd_light_obj, machine_lcd_light);
+static MP_DEFINE_CONST_FUN_OBJ_2(machine_lcd_light_obj, machine_lcd_light);
 
 /// \method fill(colour)
 ///
 /// Fill the screen with the given colour.
 ///
-STATIC mp_obj_t machine_lcd_fill(mp_obj_t self_in, mp_obj_t col_in) {
+static mp_obj_t machine_lcd_fill(mp_obj_t self_in, mp_obj_t col_in) {
     int col = mp_obj_get_int(col_in);
     lcd_clear(col);
     
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_lcd_fill_obj, machine_lcd_fill);
+static MP_DEFINE_CONST_FUN_OBJ_2(machine_lcd_fill_obj, machine_lcd_fill);
 
 /// \method pixel(x, y, colour)
 ///
 /// Set the pixel at `(x, y)` to the given colour.
 ///
-STATIC mp_obj_t machine_lcd_pixel(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_pixel(size_t n_args, const mp_obj_t *args) {
     int x = mp_obj_get_int(args[1]);
     int y = mp_obj_get_int(args[2]);
     
@@ -101,13 +101,13 @@ STATIC mp_obj_t machine_lcd_pixel(size_t n_args, const mp_obj_t *args) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_pixel_obj, 4, 4, machine_lcd_pixel);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_pixel_obj, 4, 4, machine_lcd_pixel);
 
 /// \method text(str, x, y, size)
 ///
 /// Draw the given text to the position `(x, y)` using the given size (16 24 32).
 ///
-STATIC mp_obj_t machine_lcd_text(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_text(size_t n_args, const mp_obj_t *args) {
     size_t len;
     const char *data = mp_obj_str_get_data(args[1], &len);
     int x = mp_obj_get_int(args[2]);
@@ -122,13 +122,13 @@ STATIC mp_obj_t machine_lcd_text(size_t n_args, const mp_obj_t *args) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_text_obj, 5, 5, machine_lcd_text);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_text_obj, 5, 5, machine_lcd_text);
 
 /// \method line(x1, y1, x2, y2)
 ///
 /// display a line on the lcd, from (x1, y1) to (x2, y2).
 ///
-STATIC mp_obj_t machine_lcd_line(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_line(size_t n_args, const mp_obj_t *args) {
     int x1 = mp_obj_get_int(args[1]);
     int y1 = mp_obj_get_int(args[2]);
     int x2 = mp_obj_get_int(args[3]);
@@ -140,13 +140,13 @@ STATIC mp_obj_t machine_lcd_line(size_t n_args, const mp_obj_t *args) {
     lcd_draw_line(x1, y1, x2, y2);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_line_obj, 5, 5, machine_lcd_line);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_line_obj, 5, 5, machine_lcd_line);
 
 /// \method rectangle(x1, y1, x2, y2)
 ///
 /// display a rectangle on the lcd, from (x1, y1) to (x2, y2).
 ///
-STATIC mp_obj_t machine_lcd_rectangle(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_rectangle(size_t n_args, const mp_obj_t *args) {
     int x1 = mp_obj_get_int(args[1]);
     int y1 = mp_obj_get_int(args[2]);
     int x2 = mp_obj_get_int(args[3]);
@@ -158,13 +158,13 @@ STATIC mp_obj_t machine_lcd_rectangle(size_t n_args, const mp_obj_t *args) {
     lcd_draw_rectangle(x1, y1, x2, y2);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_rectangle_obj, 5, 5, machine_lcd_rectangle);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_rectangle_obj, 5, 5, machine_lcd_rectangle);
 
 /// \method circle(x1, y1, r)
 ///
 /// display a circle on the lcd, center(x1, y1) R = r.
 ///
-STATIC mp_obj_t machine_lcd_circle(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_circle(size_t n_args, const mp_obj_t *args) {
     int x1 = mp_obj_get_int(args[1]);
     int y1 = mp_obj_get_int(args[2]);
     int r  = mp_obj_get_int(args[3]);
@@ -174,20 +174,20 @@ STATIC mp_obj_t machine_lcd_circle(size_t n_args, const mp_obj_t *args) {
     lcd_draw_circle(x1, y1, r);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_circle_obj, 4, 4, machine_lcd_circle);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_circle_obj, 4, 4, machine_lcd_circle);
 
 /// \method set_color(back, fore)
 ///
 /// Set background color and foreground color.
 ///
-STATIC mp_obj_t machine_lcd_set_color(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_set_color(size_t n_args, const mp_obj_t *args) {
     rt_uint16_t back = mp_obj_get_int(args[1]);
     rt_uint16_t fore = mp_obj_get_int(args[2]);
 
     lcd_set_color(back, fore);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_set_color_obj, 3, 3, machine_lcd_set_color);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_set_color_obj, 3, 3, machine_lcd_set_color);
 
 /// \method show_image array
 ///
@@ -197,7 +197,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_set_color_obj, 3, 3, mach
 /// @param   length  length of image
 /// @param   wide    wide of image
 /// @param   p       image_array
-STATIC mp_obj_t machine_lcd_show_image(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_show_image(size_t n_args, const mp_obj_t *args) {
     rt_uint16_t x = mp_obj_get_int(args[1]);
     rt_uint16_t y = mp_obj_get_int(args[2]);
     rt_uint16_t length = mp_obj_get_int(args[3]);
@@ -211,9 +211,9 @@ STATIC mp_obj_t machine_lcd_show_image(size_t n_args, const mp_obj_t *args) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_show_image_obj, 6, 6, machine_lcd_show_image);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_show_image_obj, 6, 6, machine_lcd_show_image);
 
-STATIC rt_uint16_t rgb888to565(rt_uint32_t RGB) 
+static rt_uint16_t rgb888to565(rt_uint32_t RGB) 
 {
      int R, G, B; 
      R = (RGB >> 19) & 0x1F; 
@@ -228,7 +228,7 @@ STATIC rt_uint16_t rgb888to565(rt_uint32_t RGB)
 /// @param   x       x position
 /// @param   y       y position
 /// @param   file    bmp file pathname
-STATIC mp_obj_t machine_lcd_show_bmp(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t machine_lcd_show_bmp(size_t n_args, const mp_obj_t *args) {
     #define BMP_INFO_SIZE 54
     rt_uint16_t x = mp_obj_get_int(args[1]);
     rt_uint16_t y = mp_obj_get_int(args[2]);
@@ -310,9 +310,9 @@ STATIC mp_obj_t machine_lcd_show_bmp(size_t n_args, const mp_obj_t *args) {
     rt_free(row_buf);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_show_bmp_obj, 4, 4, machine_lcd_show_bmp);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_lcd_show_bmp_obj, 4, 4, machine_lcd_show_bmp);
 
-STATIC const mp_rom_map_elem_t machine_lcd_locals_dict_table[] = {
+static const mp_rom_map_elem_t machine_lcd_locals_dict_table[] = {
     // instance methods
     { MP_ROM_QSTR(MP_QSTR_light), MP_ROM_PTR(&machine_lcd_light_obj) },
     { MP_ROM_QSTR(MP_QSTR_fill),  MP_ROM_PTR(&machine_lcd_fill_obj)  },
@@ -344,7 +344,7 @@ STATIC const mp_rom_map_elem_t machine_lcd_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_GRAY187), MP_ROM_INT(GRAY187) },
     { MP_ROM_QSTR(MP_QSTR_GRAY240), MP_ROM_INT(GRAY240) },
 };
-STATIC MP_DEFINE_CONST_DICT(machine_lcd_locals_dict, machine_lcd_locals_dict_table);
+static MP_DEFINE_CONST_DICT(machine_lcd_locals_dict, machine_lcd_locals_dict_table);
 
 const mp_obj_type_t machine_lcd_type = {
     { &mp_type_type },

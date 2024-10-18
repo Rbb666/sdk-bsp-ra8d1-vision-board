@@ -45,13 +45,13 @@ typedef struct _machine_wdt_obj_t {
 
 const mp_obj_type_t machine_wdt_type;
 
-STATIC void error_check(bool status, const char *msg) {
+static void error_check(bool status, const char *msg) {
     if (!status) {
         nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, msg));
     }
 }
 
-STATIC mp_obj_t machine_wdt_make_new(const mp_obj_type_t *type_in, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+static mp_obj_t machine_wdt_make_new(const mp_obj_type_t *type_in, size_t n_args, size_t n_kw, const mp_obj_t *args) {
 #define MP_WDT_DEV_NAME "wdt"
     machine_wdt_obj_t *self = m_new_obj(machine_wdt_obj_t);
     char wdt_dev_name[RT_NAME_MAX] = {0};
@@ -106,7 +106,7 @@ STATIC mp_obj_t machine_wdt_make_new(const mp_obj_type_t *type_in, size_t n_args
     return MP_OBJ_FROM_PTR(self);
 }
 
-STATIC mp_obj_t machine_wdt_feed(mp_obj_t self_in) {
+static mp_obj_t machine_wdt_feed(mp_obj_t self_in) {
     /* idle task feed */
     machine_wdt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     rt_err_t result = RT_EOK;
@@ -116,12 +116,12 @@ STATIC mp_obj_t machine_wdt_feed(mp_obj_t self_in) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_wdt_feed_obj, machine_wdt_feed);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_wdt_feed_obj, machine_wdt_feed);
 
-STATIC const mp_rom_map_elem_t machine_wdt_locals_dict_table[] = {
+static const mp_rom_map_elem_t machine_wdt_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_feed), MP_ROM_PTR(&machine_wdt_feed_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(machine_wdt_locals_dict, machine_wdt_locals_dict_table);
+static MP_DEFINE_CONST_DICT(machine_wdt_locals_dict, machine_wdt_locals_dict_table);
 
 const mp_obj_type_t machine_wdt_type = {
     { &mp_type_type },

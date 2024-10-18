@@ -702,27 +702,31 @@ SECTIONS
         __nocache_sdram_end = .;
     } > SDRAM
 
+
+    _gc_heap_start = ORIGIN(SDRAM);
+    _gc_heap_end = ORIGIN(SDRAM) + LENGTH(SDRAM);
+
     /* Main framebuffer memory */
     .fb_memory (NOLOAD) :
     {
-      . = ALIGN(4);
-      _fb_base = .;
-      . += OMV_FB_SIZE;
-
-      _fb_end = .;
-      . += OMV_FB_ALLOC_SIZE;
-
-      . = ALIGN(4);
-      _fballoc = .;
-      . = ALIGN(4);
+        . = ALIGN(4);
+        _fb_memory_start = .;
+        . += OMV_FB_SIZE;
+        . = ALIGN(4);
+        _fb_memory_end = .;
+        . += OMV_FB_ALLOC_SIZE;
+        . = ALIGN(4);
+        _fb_alloc_end = .;
+        . = ALIGN(4);
     } > SDRAM
 
+    /* Main framebuffer fast memory */
     .fb_overlay_memory (NOLOAD) :
     {
-      . = ALIGN(4);
-      _fballoc_overlay_start = .;
-      . = . + OMV_FB_OVERLAY_MEMORY_OFFSET;
-      _fballoc_overlay_end = .;
+        . = ALIGN(4);
+        _fballoc_overlay_start = .;
+        . = . + OMV_FB_OVERLAY_SIZE;
+        _fballoc_overlay_end = .;
     } > SDRAM
 
     . = (SIZEOF(.nocache_sdram) > 0) ? __nocache_sdram_end : __nocache_sdram_pre_location;

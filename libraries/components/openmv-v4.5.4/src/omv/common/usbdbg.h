@@ -17,7 +17,7 @@
  */
 #define FIRMWARE_VERSION_MAJOR    (4)
 #define FIRMWARE_VERSION_MINOR    (5)
-#define FIRMWARE_VERSION_PATCH    (4)
+#define FIRMWARE_VERSION_PATCH    (9)
 
 /**
  * To add a new debugging command, increment the last command value used.
@@ -49,7 +49,17 @@ enum usbdbg_cmd {
     USBDBG_SENSOR_ID       =0x90,
     USBDBG_TX_INPUT        =0x11,
     USBDBG_SET_TIME        =0x12,
+    USBDBG_GET_STATE       =0x93,
 };
+
+enum usbdbg_state_flags {
+    USBDBG_STATE_FLAGS_SCRIPT   = (1 << 0),
+    USBDBG_STATE_FLAGS_TEXT     = (1 << 1),
+    USBDBG_STATE_FLAGS_FRAME    = (1 << 2),
+};
+
+typedef uint32_t (*usbdbg_read_callback_t) (void *buf, uint32_t len);
+typedef uint32_t (*usbdbg_write_callback_t) (const void *buf, uint32_t len);
 
 void usbdbg_init();
 void usbdbg_wait_for_command(uint32_t timeout);
@@ -59,8 +69,8 @@ bool usbdbg_is_busy();
 bool usbdbg_get_irq_enabled();
 void usbdbg_set_irq_enabled(bool enabled);
 void usbdbg_set_script_running(bool running);
-void usbdbg_data_in(void *buffer, int length);
-void usbdbg_data_out(void *buffer, int length);
+void usbdbg_data_in(uint32_t size, usbdbg_write_callback_t write_callback);
+void usbdbg_data_out(uint32_t size, usbdbg_read_callback_t read_callback);
 void usbdbg_control(void *buffer, uint8_t brequest, uint32_t wlength);
 
 #endif /* __USBDBG_H__ */

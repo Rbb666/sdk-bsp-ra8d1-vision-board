@@ -26,10 +26,12 @@
 
 // Options controlling how MicroPython is built, overriding defaults in py/mpconfig.h
 
+#ifndef MICROPY_INCLUDED_MPCONFIGPORT_H
+#define MICROPY_INCLUDED_MPCONFIGPORT_H
 // Board specific definitions
 #include "mpconfigboard.h"
 #include "fsl_common.h"
-#include "lib/nxp_driver/sdk/CMSIS/Include/core_cm7.h"
+#include "core_cm7.h"
 
 uint32_t trng_random_u32(void);
 
@@ -57,9 +59,13 @@ uint32_t trng_random_u32(void);
 #define MICROPY_ENABLE_GC                   (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
 #define MICROPY_LONGINT_IMPL                (MICROPY_LONGINT_IMPL_MPZ)
+#ifndef MICROPY_FLOAT_IMPL // can be configured by each board via mpconfigboard.mk
+#define MICROPY_FLOAT_IMPL                  (MICROPY_FLOAT_IMPL_FLOAT)
+#endif
 #define MICROPY_SCHEDULER_DEPTH             (8)
 #define MICROPY_SCHEDULER_STATIC_NODES      (1)
 #define MICROPY_VFS                         (1)
+#define MICROPY_QSTR_EXTRA_POOL             mp_qstr_frozen_const_pool
 
 // Control over Python builtins
 #define MICROPY_PY_BUILTINS_HELP_TEXT       mimxrt_help_text
@@ -79,6 +85,7 @@ uint32_t trng_random_u32(void);
 #define MICROPY_PY_RANDOM_SEED_INIT_FUNC    (trng_random_u32())
 #define MICROPY_PY_MACHINE                  (1)
 #define MICROPY_PY_MACHINE_INCLUDEFILE      "ports/mimxrt/modmachine.c"
+#define MICROPY_PY_MACHINE_RESET            (1)
 #define MICROPY_PY_MACHINE_BARE_METAL_FUNCS (1)
 #define MICROPY_PY_MACHINE_BOOTLOADER       (1)
 #define MICROPY_PY_MACHINE_DISABLE_IRQ_ENABLE_IRQ (1)
@@ -106,6 +113,9 @@ uint32_t trng_random_u32(void);
 #define MICROPY_PY_MACHINE_SPI              (1)
 #define MICROPY_PY_MACHINE_SOFTSPI          (1)
 #define MICROPY_PY_MACHINE_TIMER            (1)
+#ifndef MICROPY_PY_MACHINE_CAN
+#define MICROPY_PY_MACHINE_CAN              (0)
+#endif
 #define MICROPY_PY_MACHINE_WDT              (1)
 #define MICROPY_PY_MACHINE_WDT_INCLUDEFILE  "ports/mimxrt/machine_wdt.c"
 #define MICROPY_PY_MACHINE_WDT_TIMEOUT_MS   (1)
@@ -116,10 +126,17 @@ uint32_t trng_random_u32(void);
 #define MICROPY_PY_ONEWIRE                  (1)
 
 // fatfs configuration used in ffconf.h
-#define MICROPY_FATFS_ENABLE_LFN            (1)
-#define MICROPY_FATFS_RPATH                 (2)
-#define MICROPY_FATFS_MAX_SS                (4096)
+#define MICROPY_FATFS_ENABLE_LFN            (2)
 #define MICROPY_FATFS_LFN_CODE_PAGE         437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
+#define MICROPY_FATFS_RPATH                 (2)
+#define MICROPY_FATFS_EXFAT                 (1)
+#if MICROPY_HW_USB_MSC
+#define MICROPY_FATFS_USE_LABEL             (1)
+#define MICROPY_FATFS_MULTI_PARTITION       (1)
+// Set FatFS block size to flash sector size to avoid caching
+// the flash sector in memory to support smaller block sizes.
+#define MICROPY_FATFS_MAX_SS                (4096)
+#endif
 
 #ifndef MICROPY_PY_NETWORK
 #define MICROPY_PY_NETWORK                  (1)
@@ -130,9 +147,9 @@ uint32_t trng_random_u32(void);
 #define MICROPY_PY_WEBSOCKET                (MICROPY_PY_LWIP)
 #define MICROPY_PY_WEBREPL                  (MICROPY_PY_LWIP)
 #define MICROPY_PY_LWIP_SOCK_RAW            (MICROPY_PY_LWIP)
-// #define MICROPY_PY_HASHLIB_MD5              (MICROPY_PY_SSL)
+#define MICROPY_PY_HASHLIB_MD5              (MICROPY_PY_SSL)
 #define MICROPY_PY_HASHLIB_SHA1             (MICROPY_PY_SSL)
-// #define MICROPY_PY_CRYPTOLIB                (MICROPY_PY_SSL)
+#define MICROPY_PY_CRYPTOLIB                (MICROPY_PY_SSL)
 
 // Prevent the "LWIP task" from running.
 #define MICROPY_PY_LWIP_ENTER   MICROPY_PY_PENDSV_ENTER
@@ -150,6 +167,8 @@ uint32_t trng_random_u32(void);
 #ifndef MICROPY_PY_NETWORK_HOSTNAME_DEFAULT
 #define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "mpy-mimxrt"
 #endif
+
+#define MICROPY_HW_ENABLE_USBDEV            (1)
 
 // Hooks to add builtins
 
@@ -193,6 +212,8 @@ extern const struct _mp_obj_type_t mp_network_cyw43_type;
     do { \
         extern void mp_handle_pending(bool); \
         mp_handle_pending(true); \
+        extern void tud_task_ext(uint32_t timeout_ms, bool in_isr); \
+        tud_task_ext(0, false); \
         __WFE(); \
     } while (0);
 #endif
@@ -217,3 +238,5 @@ typedef long mp_off_t;
 
 // Need to provide a declaration/definition of alloca()
 #include <alloca.h>
+
+#endif //  MICROPY_INCLUDED_MPCONFIGPORT_H

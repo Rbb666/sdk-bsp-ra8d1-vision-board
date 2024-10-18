@@ -9,6 +9,10 @@
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
+// #ifdef BSP_USING_OPENMV
+//     #include "led.h"
+// #endif /* BSP_USING_OPENMV */
+
 #ifdef BSP_USING_ONCHIP_FS
 #include "fal.h"
 #define FS_PARTITION_NAME  "disk"
@@ -26,7 +30,7 @@ static void sd_mount(void)
         rt_kprintf("Create a block device on the %s partition of flash successful.\n", FS_PARTITION_NAME);
     }
 
-    if(rt_device_find(FS_PARTITION_NAME) != RT_NULL)
+    if (rt_device_find(FS_PARTITION_NAME) != RT_NULL)
     {
         dfs_mkfs("elm", FS_PARTITION_NAME);
         if (dfs_mount(FS_PARTITION_NAME, "/", "elm", 0, 0) == RT_EOK)
@@ -47,10 +51,13 @@ static void sd_mount(void)
 #elif defined(BSP_USING_SDCARD_FS)
 #include <drv_sdhi.h>
 
-/* SD Card hot plug detection pin */
-#define SD_CHECK_PIN  "p405"
+#ifdef SDHI_USING_CD
+    /* SD Card hot plug detection pin */
+    #define SD_CHECK_PIN  RA_SDHI_CD_PIN
+    static rt_base_t sd_check_pin = 0;
+#endif
 
-static rt_base_t sd_check_pin = 0;
+struct rt_semaphore sem_mnt_lock;
 
 static void _sdcard_mount(void)
 {
@@ -71,6 +78,7 @@ static void _sdcard_mount(void)
         if (dfs_mount("sd", "/", "elm", 0, 0) == RT_EOK)
         {
             LOG_I("sd card mount to '/'");
+            rt_sem_release(&sem_mnt_lock);
         }
         else
         {
@@ -92,10 +100,11 @@ static void _sdcard_unmount(void)
 
 static void sd_auto_mount(void *parameter)
 {
-    rt_uint8_t re_sd_check_pin = 1;
-    rt_thread_mdelay(20);
+    rt_uint8_t re_sd_check_pin = 0;
+    rt_thread_mdelay(200);
 
-    if (!rt_pin_read(sd_check_pin))
+#ifdef SDHI_USING_CD
+    if (re_sd_check_pin = rt_pin_read(sd_check_pin))
     {
         _sdcard_mount();
     }
@@ -103,28 +112,39 @@ static void sd_auto_mount(void *parameter)
     while (1)
     {
         rt_thread_mdelay(200);
-
-        if (re_sd_check_pin && (re_sd_check_pin = rt_pin_read(sd_check_pin)) == 0)
+        if (!re_sd_check_pin && (re_sd_check_pin = rt_pin_read(sd_check_pin)) != 0)
         {
+#ifdef BSP_USING_OPENMV
+            // led_state(LED_RED, 1);
+#endif  /* BSP_USING_OPENMV */
             _sdcard_mount();
+#ifdef BSP_USING_OPENMV
+            // led_state(LED_RED, 0);
+#endif  /* BSP_USING_OPENMV */
         }
 
-        if (!re_sd_check_pin && (re_sd_check_pin = rt_pin_read(sd_check_pin)) != 0)
+        if (re_sd_check_pin && (re_sd_check_pin = rt_pin_read(sd_check_pin)) == 0)
         {
             _sdcard_unmount();
         }
     }
+#else
+    _sdcard_mount();
+#endif  /* SDHI_USING_CD */
 }
 
 static void sd_mount(void)
 {
     rt_thread_t tid;
-
+#ifdef SDHI_USING_CD
     sd_check_pin = rt_pin_get(SD_CHECK_PIN);
     rt_pin_mode(sd_check_pin, PIN_MODE_INPUT_PULLUP);
+#endif  /* SDHI_USING_CD */
+
+    rt_sem_init(&sem_mnt_lock, "mnt_lock", 0, RT_IPC_FLAG_PRIO);
 
     tid = rt_thread_create("sd_mount", sd_auto_mount, RT_NULL,
-                           2048, RT_THREAD_PRIORITY_MAX - 2, 20);
+                           2048, RT_THREAD_PRIORITY_MAX - 12, 20);
     if (tid != RT_NULL)
     {
         rt_thread_startup(tid);
@@ -161,5 +181,5 @@ int mount_init(void)
     sd_mount();
     return RT_EOK;
 }
-// INIT_ENV_EXPORT(mount_init);
+INIT_ENV_EXPORT(mount_init);
 #endif

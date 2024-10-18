@@ -54,13 +54,13 @@ typedef struct _machine_timer_obj_t {
 
 const mp_obj_type_t machine_timer_type;
 
-STATIC void error_check(bool status, const char *msg) {
+static void error_check(bool status, const char *msg) {
     if (!status) {
         nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, msg));
     }
 }
 
-STATIC void machine_timer_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+static void machine_timer_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_timer_obj_t *self = self_in;
 
     mp_printf(print, "Timer(%p; ", self);
@@ -74,7 +74,7 @@ STATIC void machine_timer_print(const mp_print_t *print, mp_obj_t self_in, mp_pr
     mp_printf(print, "auto_reload=%d)", self->is_repeat);
 }
 
-STATIC mp_obj_t machine_timer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+static mp_obj_t machine_timer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     machine_timer_obj_t *self = m_new_obj(machine_timer_obj_t);
     char timer_dev_name[RT_NAME_MAX] = {0};
 
@@ -116,7 +116,7 @@ STATIC mp_obj_t machine_timer_make_new(const mp_obj_type_t *type, size_t n_args,
 
 static machine_timer_obj_t *timer_self[MAX_TIMER] = {RT_NULL};
 
-STATIC mp_obj_t machine_timer_deinit(mp_obj_t self_in) {
+static mp_obj_t machine_timer_deinit(mp_obj_t self_in) {
     machine_timer_obj_t *self = self_in;
     rt_err_t result = RT_EOK;
 
@@ -129,16 +129,16 @@ STATIC mp_obj_t machine_timer_deinit(mp_obj_t self_in) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_timer_deinit_obj, machine_timer_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_timer_deinit_obj, machine_timer_deinit);
 
-STATIC rt_err_t timer_event_handler(rt_device_t dev, rt_size_t size) {
+static rt_err_t timer_event_handler(rt_device_t dev, rt_size_t size) {
     machine_timer_obj_t *self = timer_self[dev->device_id];
 
     mp_sched_schedule(self->timeout_cb, MP_OBJ_FROM_PTR(self));
     return RT_EOK;
 }
 
-STATIC mp_obj_t machine_timer_init(mp_uint_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+static mp_obj_t machine_timer_init(mp_uint_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
     machine_timer_obj_t *self = (machine_timer_obj_t *)args[0];
     rt_bool_t result = RT_EOK;
     int mode = 0;
@@ -210,10 +210,10 @@ STATIC mp_obj_t machine_timer_init(mp_uint_t n_args, const mp_obj_t *args, mp_ma
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_timer_init_obj, 1, machine_timer_init);
+static MP_DEFINE_CONST_FUN_OBJ_KW(machine_timer_init_obj, 1, machine_timer_init);
 
 
-STATIC mp_obj_t machine_timer_callback(mp_uint_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+static mp_obj_t machine_timer_callback(mp_uint_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
     machine_timer_obj_t *self = (machine_timer_obj_t *)args[0];
     rt_bool_t result = RT_EOK;
 
@@ -247,16 +247,16 @@ STATIC mp_obj_t machine_timer_callback(mp_uint_t n_args, const mp_obj_t *args, m
     }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(machine_timer_callback_obj, 0,machine_timer_callback);
+static MP_DEFINE_CONST_FUN_OBJ_KW(machine_timer_callback_obj, 0,machine_timer_callback);
 
-STATIC const mp_rom_map_elem_t machine_timer_locals_dict_table[] = {
+static const mp_rom_map_elem_t machine_timer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_timer_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_timer_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_callback), MP_ROM_PTR(&machine_timer_callback_obj) },
     { MP_ROM_QSTR(MP_QSTR_ONE_SHOT), MP_ROM_INT(RT_FALSE) },
     { MP_ROM_QSTR(MP_QSTR_PERIODIC), MP_ROM_INT(RT_TRUE) },
 };
-STATIC MP_DEFINE_CONST_DICT(machine_timer_locals_dict, machine_timer_locals_dict_table);
+static MP_DEFINE_CONST_DICT(machine_timer_locals_dict, machine_timer_locals_dict_table);
 
 const mp_obj_type_t machine_timer_type = {
     { &mp_type_type },

@@ -44,6 +44,10 @@ extern const struct _mp_obj_module_t mp_module_machine;
 #undef MODULE_DEF_MACHINE
 #define MODULE_DEF_MACHINE { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&mp_module_machine) },
 
+extern const struct _mp_obj_module_t ml_module;
+#undef MODULE_DEF_ML
+#define MODULE_DEF_ML { MP_ROM_QSTR(MP_QSTR_ml), MP_ROM_PTR(&ml_module) },
+
 extern const struct _mp_obj_module_t mp_module_os;
 #undef MODULE_DEF_OS
 #define MODULE_DEF_OS { MP_ROM_QSTR(MP_QSTR_os), MP_ROM_PTR(&mp_module_os) },
@@ -68,6 +72,10 @@ extern const struct _mp_obj_module_t mp_module_struct;
 #undef MODULE_DEF_STRUCT
 #define MODULE_DEF_STRUCT { MP_ROM_QSTR(MP_QSTR_struct), MP_ROM_PTR(&mp_module_struct) },
 
+extern const struct _mp_obj_module_t ml_module;
+#undef MODULE_DEF_TF
+#define MODULE_DEF_TF { MP_ROM_QSTR(MP_QSTR_tf), MP_ROM_PTR(&ml_module) },
+
 extern const struct _mp_obj_module_t mp_module_time;
 #undef MODULE_DEF_TIME
 #define MODULE_DEF_TIME { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) },
@@ -91,10 +99,6 @@ extern const struct _mp_obj_module_t mp_module_cmath;
 extern const struct _mp_obj_module_t mp_module_deflate;
 #undef MODULE_DEF_DEFLATE
 #define MODULE_DEF_DEFLATE { MP_ROM_QSTR(MP_QSTR_deflate), MP_ROM_PTR(&mp_module_deflate) },
-
-//extern const struct _mp_obj_module_t fir_module;
-//#undef MODULE_DEF_FIR
-//#define MODULE_DEF_FIR { MP_ROM_QSTR(MP_QSTR_fir), MP_ROM_PTR(&fir_module) },
 
 //extern const struct _mp_obj_module_t mp_module_framebuf;
 //#undef MODULE_DEF_FRAMEBUF
@@ -140,10 +144,6 @@ extern const struct _mp_obj_module_t mp_module_sys;
 #undef MODULE_DEF_SYS
 #define MODULE_DEF_SYS { MP_ROM_QSTR(MP_QSTR_sys), MP_ROM_PTR(&mp_module_sys) },
 
-//extern const struct _mp_obj_module_t tf_module;
-//#undef MODULE_DEF_TF
-//#define MODULE_DEF_TF { MP_ROM_QSTR(MP_QSTR_tf), MP_ROM_PTR(&tf_module) },
-
 extern const struct _mp_obj_module_t mp_module_uctypes;
 #undef MODULE_DEF_UCTYPES
 #define MODULE_DEF_UCTYPES { MP_ROM_QSTR(MP_QSTR_uctypes), MP_ROM_PTR(&mp_module_uctypes) },
@@ -184,12 +184,14 @@ extern const struct _mp_obj_module_t ulab_user_cmodule;
     MODULE_DEF_IO \
     MODULE_DEF_JSON \
     MODULE_DEF_MACHINE \
+    MODULE_DEF_ML \
     MODULE_DEF_OS \
     MODULE_DEF_PLATFORM \
     MODULE_DEF_RANDOM \
     MODULE_DEF_RE \
     MODULE_DEF_SELECT \
     MODULE_DEF_STRUCT \
+    MODULE_DEF_TF \
     MODULE_DEF_TIME \
 // MICROPY_REGISTERED_EXTENSIBLE_MODULES
 

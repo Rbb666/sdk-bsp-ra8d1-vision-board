@@ -104,8 +104,8 @@ static const byte fun_data_frozentest__lt_module_gt_[70] = {
 };
 static const mp_raw_code_t raw_code_frozentest__lt_module_gt_ = {
     .kind = MP_CODE_BYTECODE,
-    .scope_flags = 0x00,
-    .n_pos_args = 0,
+//    .scope_flags = 0x00,
+//    .n_pos_args = 0,
     .fun_data = fun_data_frozentest__lt_module_gt_,
     #if MICROPY_PERSISTENT_CODE_SAVE || MICROPY_DEBUG_PRINTERS
     .fun_data_len = 70,
@@ -133,7 +133,7 @@ static const mp_raw_code_t raw_code_frozentest__lt_module_gt_ = {
     #endif
     #endif
     #if MICROPY_EMIT_MACHINE_CODE
-    .type_sig = 0,
+//    .type_sig = 0,
     #endif
 };
 
@@ -162,7 +162,7 @@ static const mp_frozen_module_t frozen_module_frozentest = {
         .qstr_table = (qstr_short_t *)&const_qstr_table_data_frozentest,
         .obj_table = (mp_obj_t *)&const_obj_table_data_frozentest,
     },
-    .rc = &raw_code_frozentest__lt_module_gt_,
+    .proto_fun = &raw_code_frozentest__lt_module_gt_,
 };
 
 ////////////////////////////////////////////////////////////////////////////////

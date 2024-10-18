@@ -1,31 +1,30 @@
-import os
 from building import *
 
 src = []
-objs = []
 cwd  = GetCurrentDir()
 CPPPATH = [cwd]
 
 src = Glob('omv_fs/*.c')
 src += Glob('omv_usb/*.c')
 src += Glob('omv_alloc/*.c')
-src += Glob('omv_framebuffer/*.c')
 src += Glob('omv_lcd/*.c')
+src += Glob('omv_tf/*.c')
+src += Glob('omv_framebuffer/*.c')
 
-CPPDEFINES = [
-            '__VTOR_PRESENT = 1',
-            '__MPU_PRESENT = 1',
-            '__DSP_PRESENT = 1',
-            '__ICACHE_PRESENT = 1',
-            '__DCACHE_PRESENT = 1',
-            '__FPU_PRESENT = 1',
-            '__ARM_ARCH_8M_MAIN__ = 1',
-            '__ARM_ARCH_8_1M_MAIN__ = 1',
-            ]
+CPPDEFINES = ['ARM_MATH_MVEF','ARM_MATH_HELIUM',
+              '__FPU_PRESENT=1','__VTOR_PRESENT=1',
+              '__MPU_PRESENT=1','__DSP_PRESENT=1',
+              '__ICACHE_PRESENT=1','__DCACHE_PRESENT=1',
+              '__ARM_ARCH_8_1M_MAIN__=1','__ARM_ARCH_8_1M_MAIN__=1'
+              ]
+# CPPDEFINES += ['CMSIS_MCU_H=\\"hal_data.h\\"','ULAB_CONFIG_FILE=\\"ulab_config.h\\"']
+
+CPPPATH += [cwd + '/omv_fs'] 
+CPPPATH += [cwd + '/omv_tf'] 
 
 if GetDepend(['OPENMV_USING_LCD']):
-   CPPDEFINES += ['MICROPY_PY_DISPLAY = 1']
+   CPPDEFINES += ['MICROPY_PY_DISPLAY=1']
 
-objs = DefineGroup('openmv/rtt_port', src, depend = ['BSP_USING_OPENMV'], CPPPATH = CPPPATH, CPPDEFINES = CPPDEFINES)
+group = DefineGroup('openmv/rtt_port', src, depend = ['BSP_USING_OPENMV'], CPPPATH = CPPPATH, CPPDEFINES = CPPDEFINES)
 
-Return('objs')
+Return('group')

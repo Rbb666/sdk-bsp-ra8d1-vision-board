@@ -28,8 +28,9 @@ typedef struct framebuffer {
     int32_t u, v;
     PIXFORMAT_STRUCT;
     int32_t streaming_enabled;
-    uint32_t raw_buffer_size;
-    int32_t n_buffers;
+    uint32_t buff_size;
+    uint32_t n_buffers;
+    uint32_t frame_size;
     int32_t head;
     volatile int32_t tail;
     bool check_head;
@@ -40,8 +41,9 @@ typedef struct framebuffer {
 extern framebuffer_t *framebuffer;
 
 typedef enum {
-    FB_NO_FLAGS =   (0 << 0),
-    FB_PEEK     =   (1 << 0),   // If set, will not move the head/tail.
+    FB_NO_FLAGS   = (0 << 0),
+    FB_PEEK       = (1 << 0),   // If set, will not move the head/tail.
+    FB_INVALIDATE = (1 << 1),   // If set, invalidate the buffer on return.
 } framebuffer_flags_t;
 
 typedef struct vbuffer {
@@ -105,11 +107,10 @@ void framebuffer_update_jpeg_buffer();
 // otherwise, retain the last frame in the fifo.
 void framebuffer_flush_buffers(bool fifo_flush);
 
-// Controls the number of virtual buffers in the frame buffer.
+// Set the number of virtual buffers in the frame buffer.
+// If n_buffers = -1 the number of virtual buffers will be set to 3 each  if possible.
+// If n_buffers = 1 the whole framebuffer is used. In this case, `frame_size` is ignored.
 int framebuffer_set_buffers(int32_t n_buffers);
-
-// Automatically finds the best buffering size given RAM.
-void framebuffer_auto_adjust_buffers();
 
 // Call when done with the current vbuffer to mark it as free.
 void framebuffer_free_current_buffer();

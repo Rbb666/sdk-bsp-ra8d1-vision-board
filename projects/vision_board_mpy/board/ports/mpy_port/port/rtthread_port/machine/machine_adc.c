@@ -39,7 +39,7 @@ typedef struct _machine_adc_obj_t
     uint8_t is_init;
 } machine_adc_obj_t;
 
-STATIC void error_check(bool status, const char *msg)
+static void error_check(bool status, const char *msg)
 {
     if (!status)
     {
@@ -47,7 +47,7 @@ STATIC void error_check(bool status, const char *msg)
     }
 }
 
-STATIC mp_obj_t machine_adc_make_new(const mp_obj_type_t *type,
+static mp_obj_t machine_adc_make_new(const mp_obj_type_t *type,
                                      size_t n_args, size_t n_kw, const mp_obj_t *args)
 {
     // create ADC object from the given pin
@@ -96,7 +96,7 @@ STATIC mp_obj_t machine_adc_make_new(const mp_obj_type_t *type,
     return MP_OBJ_FROM_PTR(self);
 }
 
-STATIC mp_obj_t machine_adc_init(size_t n_args, const mp_obj_t *args)
+static mp_obj_t machine_adc_init(size_t n_args, const mp_obj_t *args)
 {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     rt_err_t result = RT_EOK;
@@ -110,7 +110,7 @@ STATIC mp_obj_t machine_adc_init(size_t n_args, const mp_obj_t *args)
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_adc_init_obj, 2, 2, machine_adc_init);
 
-STATIC mp_obj_t machine_adc_deinit(mp_obj_t self_in)
+static mp_obj_t machine_adc_deinit(mp_obj_t self_in)
 {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     rt_err_t result = RT_EOK;
@@ -124,9 +124,9 @@ STATIC mp_obj_t machine_adc_deinit(mp_obj_t self_in)
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_deinit_obj, machine_adc_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_deinit_obj, machine_adc_deinit);
 
-STATIC mp_obj_t machine_adc_read(mp_obj_t self_in)
+static mp_obj_t machine_adc_read(mp_obj_t self_in)
 {
     machine_adc_obj_t *self = MP_OBJ_TO_PTR(self_in);
     int tval = 0;
@@ -137,16 +137,16 @@ STATIC mp_obj_t machine_adc_read(mp_obj_t self_in)
     return MP_OBJ_NEW_SMALL_INT(tval);
 }
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_obj, machine_adc_read);
+static MP_DEFINE_CONST_FUN_OBJ_1(machine_adc_read_obj, machine_adc_read);
 
-STATIC const mp_rom_map_elem_t machine_adc_locals_dict_table[] =
+static const mp_rom_map_elem_t machine_adc_locals_dict_table[] =
 {
     { MP_ROM_QSTR(MP_QSTR_init),    MP_ROM_PTR(&machine_adc_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit),  MP_ROM_PTR(&machine_adc_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_read),    MP_ROM_PTR(&machine_adc_read_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(machine_adc_locals_dict,
+static MP_DEFINE_CONST_DICT(machine_adc_locals_dict,
                             machine_adc_locals_dict_table);
 
 MP_DEFINE_CONST_OBJ_TYPE(

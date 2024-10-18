@@ -22,12 +22,6 @@
 // Enable YUV LUT
 //#define IMLIB_ENABLE_YUV_LUT
 
-// Enable mean pooling
-#define IMLIB_ENABLE_MEAN_POOLING
-
-// Enable midpoint pooling
-#define IMLIB_ENABLE_MIDPOINT_POOLING
-
 // Enable ISP ops
 #define IMLIB_ENABLE_ISP_OPS
 
@@ -101,6 +95,12 @@
 
 // Enable find_apriltags() (64 KB)
 #define IMLIB_ENABLE_APRILTAGS
+#define IMLIB_ENABLE_APRILTAGS_TAG16H5
+#define IMLIB_ENABLE_APRILTAGS_TAG25H7
+#define IMLIB_ENABLE_APRILTAGS_TAG25H9
+#define IMLIB_ENABLE_APRILTAGS_TAG36H10
+#define IMLIB_ENABLE_APRILTAGS_TAG36H11
+#define IMLIB_ENABLE_APRILTAGS_ARTOOLKIT
 
 // Enable fine find_apriltags() - (8-way connectivity versus 4-way connectivity)
 // #define IMLIB_ENABLE_FINE_APRILTAGS
@@ -119,18 +119,16 @@
 #define IMLIB_ENABLE_FEATURES_BUILTIN_FACE_CASCADE
 #define IMLIB_ENABLE_FEATURES_BUILTIN_EYES_CASCADE
 
-// Enable CMSIS NN
-// #if !defined(CUBEAI)
-// #define IMLIB_ENABLE_CNN
-// #endif
-
 // Enable Tensor Flow
 #if !defined(CUBEAI)
-#define IMLIB_ENABLE_TF (IMLIB_TF_FULLOPS)
+#define IMLIB_ENABLE_TFLM
+#define IMLIB_ENABLE_TFLM_BUILTIN_FOMO_FACE_DETECTION
+#define IMLIB_ENABLE_TFLM_BUILTIN_PERSON_DETECT
+#define IMLIB_ENABLE_TFLM_BUILTIN_FORCE_INT_QUANT
 #endif
 
 // Enable FAST (20+ KBs).
-// #define IMLIB_ENABLE_FAST
+#define IMLIB_ENABLE_FAST
 
 // Enable find_template()
 #define IMLIB_FIND_TEMPLATE
@@ -156,4 +154,8 @@
 
 // Stereo Imaging
 // #define IMLIB_ENABLE_STEREO_DISPARITY
+
+// Bayer
+#define IMLIB_ENABLE_DEBAYER_OPTIMIZATION
+
 #endif //__IMLIB_CONFIG_H__

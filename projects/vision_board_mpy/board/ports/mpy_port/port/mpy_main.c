@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "py/builtin.h"
@@ -69,6 +69,8 @@ void mpy_main(void *parm)
 #endif
     mp_init();
 
+    srand(rt_tick_get());
+
     pyexec_friendly_repl();
 
     mp_deinit();
@@ -88,15 +90,15 @@ void gc_collect(void)
 }
 #endif
 
-mp_lexer_t *mp_lexer_new_from_file(qstr filename)
-{
-    mp_raise_OSError(MP_ENOENT);
-}
+// mp_lexer_t *mp_lexer_new_from_file(qstr filename)
+// {
+//     mp_raise_OSError(MP_ENOENT);
+// }
 
-mp_import_stat_t mp_import_stat(const char *path)
-{
-    return MP_IMPORT_STAT_NO_EXIST;
-}
+// mp_import_stat_t mp_import_stat(const char *path)
+// {
+//     return MP_IMPORT_STAT_NO_EXIST;
+// }
 
 void nlr_jump_fail(void *val)
 {
@@ -111,6 +113,25 @@ void NORETURN __fatal_error(const char *msg)
     {
         ;
     }
+}
+
+#define POLY (0xD5)
+void mp_hal_delay_us(mp_uint_t us);
+uint8_t rosc_random_u8(size_t cycles) {
+    static uint8_t r;
+    for (size_t i = 0; i < cycles; ++i) {
+        r = ((r << 1) | rand()) ^ (r & 0x80 ? POLY : 0);
+        mp_hal_delay_us(1);
+    }
+    return r;
+}
+
+uint32_t rosc_random_u32(void) {
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; ++i) {
+        value = value << 8 | rosc_random_u8(32);
+    }
+    return value;
 }
 
 int DEBUG_printf(const char *format, ...)

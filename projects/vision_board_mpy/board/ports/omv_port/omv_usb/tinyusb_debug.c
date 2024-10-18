@@ -15,14 +15,16 @@
 #include "py/stream.h"
 #include "py/mphal.h"
 #include "py/ringbuf.h"
+#include "omv_common.h"
 
 #include "tusb.h"
 #include "usbdbg.h"
 #include "tinyusb_debug.h"
 
-#define DEBUG_MAX_PACKET       (OMV_TUSBDBG_PACKET)
-#define DEBUG_BAUDRATE_SLOW    (921600)
-#define DEBUG_BAUDRATE_FAST    (12000000)
+#define DEBUG_MAX_PACKET        (OMV_TUSBDBG_PACKET)
+#define DEBUG_BAUDRATE_SLOW     (921600)
+#define DEBUG_BAUDRATE_FAST     (12000000)
+#define DEBUG_EP_SIZE           (TUD_OPT_HIGH_SPEED ? 512 : 64)
 
 extern void __fatal_error();
 
@@ -100,19 +102,21 @@ static void tinyusb_debug_task(void) {
         }
         if (request & 0x80) {
             // Device-to-host data phase
-            int bytes = MIN(xfer_length, DEBUG_MAX_PACKET);
-            if (bytes <= tud_cdc_write_available()) {
-                xfer_length -= bytes;
-                usbdbg_data_in(dbg_buf, bytes);
-                tud_cdc_write(dbg_buf, bytes);
+            int size = OMV_MIN(xfer_length, tud_cdc_write_available());
+            if (size) {
+                xfer_length -= size;
+                usbdbg_data_in(size, tud_cdc_write);
             }
-            tud_cdc_write_flush();
+            if (size > 0 && size < DEBUG_EP_SIZE) {
+                tud_cdc_write_flush();
+            }
         } else {
             // Host-to-device data phase
-            int bytes = MIN(xfer_length, DEBUG_MAX_PACKET);
-            uint32_t count = tud_cdc_read(dbg_buf, bytes);
-            xfer_length -= count;
-            usbdbg_data_out(dbg_buf, count);
+            int size = OMV_MIN(xfer_length, tud_cdc_available());
+            if (size) {
+                xfer_length -= size;
+                usbdbg_data_out(size, tud_cdc_read);
+            }
         }
     }
 }

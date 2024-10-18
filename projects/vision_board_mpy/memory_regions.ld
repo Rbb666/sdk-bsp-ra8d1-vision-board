@@ -15,7 +15,7 @@
                 ID_CODE_START  = 0x00000000;
                 ID_CODE_LENGTH = 0x0;
                 SDRAM_START  = 0x68000000;
-                SDRAM_LENGTH = 0x8000000;
+                SDRAM_LENGTH = 0x2000000;
                 QSPI_FLASH_START  = 0x60000000;
                 QSPI_FLASH_LENGTH = 0x0;
                 OSPI_DEVICE_0_START  = 0x80000000;
@@ -29,5 +29,5 @@
                 NS_OFFSET_START  = 0x10000000;
                 NS_OFFSET_LENGTH = 0x0;
                 OMV_FB_SIZE = 0x600000;
-                OMV_FB_ALLOC_SIZE = 0x200000;
-                OMV_FB_OVERLAY_MEMORY_OFFSET = 0x7C000;
+                OMV_FB_ALLOC_SIZE = 0x600000;
+                OMV_FB_OVERLAY_SIZE = 0x80000;

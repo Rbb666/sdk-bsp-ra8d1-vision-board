@@ -8,7 +8,6 @@
  */
 #ifndef __FILE_UTILS_H__
 #define __FILE_UTILS_H__
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <ff.h>

@@ -25,7 +25,7 @@
 #include <py/mphal.h>
 #include "shared/runtime/pyexec.h"
 #include "shared/readline/readline.h"
-#include "boot_utils.h"
+#include "mp_utils.h"
 #include <framebuffer.h>
 #include <fb_alloc.h>
 #include <usbdbg.h>
@@ -34,19 +34,20 @@
 #include <tusb.h>
 #endif /* BSP_USING_OPENMV */
 #ifdef RT_USING_FAL
-    #include "fal.h"
+#include "fal.h"
 #endif /* RT_USING_FAL */
 
 #define DRV_DEBUG
-#define LOG_TAG             "main"
+#define LOG_TAG "main"
 #include <drv_log.h>
 
 /* MicroPython runs as a task under RT-Thread */
-#define MP_TASK_STACK_SIZE      (64 * 1024)
+#define MP_TASK_STACK_SIZE (64 * 1024)
 
 #ifdef BSP_USING_OPENMV
+// static char gc_heap[OMV_HEAP_SIZE] BSP_ALIGN_VARIABLE(4) BSP_PLACE_IN_SECTION(".sdram");
+extern uint8_t _gc_heap_start, _gc_heap_end;
 static void *stack_top = RT_NULL;
-static char OMV_ATTR_SECTION(OMV_ATTR_ALIGNED(gc_heap[OMV_HEAP_SIZE], 4), ".data");
 
 extern int mount_init(void);
 extern void fmath_init(void);
@@ -59,7 +60,7 @@ void *__signgam_addr(void)
 
 static void omv_entry(void *parameter)
 {
-    (void) parameter;
+    (void)parameter;
     int stack_dummy;
     stack_top = (void *)&stack_dummy;
 
@@ -71,22 +72,23 @@ static void omv_entry(void *parameter)
 #endif
 #ifdef BSP_USING_FS
     /* wait sdcard mount */
-//    extern struct rt_semaphore sem_mnt_lock;;
-//  rt_sem_take(&sem_mnt_lock, 400);
+    extern struct rt_semaphore sem_mnt_lock;
+    rt_sem_take(&sem_mnt_lock, 400);
 
 //    struct dfs_fdtable *fd_table_bak = NULL;
 #endif
 //    fmath_init();
 soft_reset:
-//#ifdef BSP_USING_FS
-//    mp_sys_resource_bak(&fd_table_bak);
-//#endif
+    // #ifdef BSP_USING_FS
+    //     mp_sys_resource_bak(&fd_table_bak);
+    // #endif
     /* Stack limit should be less than real stack size, so we have a */
     /* chance to recover from limit hit. (Limit is measured in bytes) */
     mp_stack_set_top(stack_top);
     mp_stack_set_limit(MP_TASK_STACK_SIZE - 1024);
     /* GC init */
-    gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
+    // gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
+    gc_init(&_gc_heap_start, &_gc_heap_end);
 #if MICROPY_PY_THREAD
     mp_thread_init(rt_thread_self()->stack_addr, MP_TASK_STACK_SIZE / sizeof(uintptr_t));
 #endif
@@ -109,17 +111,17 @@ soft_reset:
         LOG_E("sensor init failed!");
     }
 #endif
-	
-	extern int usb_cdc_init(void);
+
+    extern int usb_cdc_init(void);
     usb_cdc_init();
 
     // Run boot.py script.
-    bool interrupted = bootutils_exec_bootscript("boot.py", true, false);
+    bool interrupted = mp_exec_bootscript("boot.py", true, false);
 
     // Run main.py script on first soft-reset.
     if (first_soft_reset && !interrupted)
     {
-        bootutils_exec_bootscript("main.py", true, false);
+        mp_exec_bootscript("main.py", true, false);
         goto soft_reset_exit;
     }
 
@@ -167,7 +169,7 @@ soft_reset:
         }
         else
         {
-            mp_obj_print_exception(&mp_plat_print, (mp_obj_t) nlr.ret_val);
+            mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);
         }
 
         if (usbdbg_is_busy() && nlr_push(&nlr) == 0)
@@ -194,10 +196,10 @@ soft_reset_exit:
 #ifdef RT_USING_DFS
 //    mp_sys_resource_gc(fd_table_bak);
 #endif
-#ifdef OPENMV_USING_KEY
-    rt_uint32_t pin = rt_pin_get(USER_KEY_PIN_NAME);
-    rt_pin_detach_irq(pin);
-#endif
+// #ifdef OPENMV_USING_KEY
+//     rt_uint32_t pin = rt_pin_get(USER_KEY_PIN_NAME);
+//     rt_pin_detach_irq(pin);
+// #endif
     first_soft_reset = false;
     goto soft_reset;
 }
@@ -212,7 +214,7 @@ static void omv_init_func(void)
 
     rt_thread_startup(tid);
 }
-#endif  /* BSP_USING_OPENMV */
+#endif /* BSP_USING_OPENMV */
 
 void hal_entry(void)
 {
