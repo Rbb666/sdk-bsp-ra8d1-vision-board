@@ -85,7 +85,6 @@ static void *realloc_ext(void *ptr, size_t n_bytes, bool allow_move) {
 void *m_malloc(size_t num_bytes) {
     void *ptr = malloc(num_bytes);
     if (ptr == NULL && num_bytes != 0) {
-        rt_kprintf("malloc fail!!!!!!!!\n");
         m_malloc_fail(num_bytes);
     }
     #if MICROPY_MEM_STATS

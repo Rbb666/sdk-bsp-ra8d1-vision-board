@@ -28,6 +28,6 @@
                 DTCM_LENGTH = 0x10000;
                 NS_OFFSET_START  = 0x10000000;
                 NS_OFFSET_LENGTH = 0x0;
-                OMV_FB_SIZE = 0x600000;
-                OMV_FB_ALLOC_SIZE = 0x600000;
+                OMV_FB_SIZE = 0x800000;
+                OMV_FB_ALLOC_SIZE = 0x800000;
                 OMV_FB_OVERLAY_SIZE = 0x80000;

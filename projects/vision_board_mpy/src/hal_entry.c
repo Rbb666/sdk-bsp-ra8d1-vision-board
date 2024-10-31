@@ -84,11 +84,14 @@ soft_reset:
     // #endif
     /* Stack limit should be less than real stack size, so we have a */
     /* chance to recover from limit hit. (Limit is measured in bytes) */
-    mp_stack_set_top(stack_top);
-    mp_stack_set_limit(MP_TASK_STACK_SIZE - 1024);
+    // mp_stack_set_top(stack_top);
+    // mp_stack_set_limit(MP_TASK_STACK_SIZE - 1024);
     /* GC init */
     // gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
-    gc_init(&_gc_heap_start, &_gc_heap_end);
+    // Initialize the stack and GC memory.
+    extern uint8_t _sstack, _estack, _heap_start, _heap_end;
+    mp_init_gc_stack(&_sstack, &_estack, &_heap_start, &_heap_end, 1024);
+
 #if MICROPY_PY_THREAD
     mp_thread_init(rt_thread_self()->stack_addr, MP_TASK_STACK_SIZE / sizeof(uintptr_t));
 #endif

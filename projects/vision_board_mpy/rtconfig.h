@@ -431,7 +431,7 @@
 
 /* OpenMV Buffer Size Configure */
 
-#define OPENMV_JPEG_BUF_SIZE 32768
+#define OPENMV_JPEG_BUF_SIZE 131072
 #define OPENMV_HEAP_SIZE 233472
 /* end of OpenMV Buffer Size Configure */
 

@@ -102,6 +102,10 @@
 // Core VBAT for selftests
 #define OMV_CORE_VBAT           "3.3"
 
+
+#define OMV_GC_BLOCK0_MEMORY                  RAM  // Main GC block
+#define OMV_GC_BLOCK0_SIZE                    (26K)
+
 // Buffer size
 #define OMV_FB_OVERLAY_MEMORY   SDRAM
 #define OMV_JPEG_BUF_SIZE       (OPENMV_JPEG_BUF_SIZE)  // IDE JPEG buffer (header + data).

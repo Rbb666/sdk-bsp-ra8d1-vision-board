@@ -626,10 +626,19 @@ SECTIONS
         __HeapLimit = .;
     } > RAM
 
+    .gc.block0 (NOLOAD) : ALIGN(4)
+    {
+        _heap_start = .;
+        . = . + 26K;
+        . = ALIGN(4);
+        _heap_end  = .;
+    } >RAM
+
     /* Stacks are stored in this section. */
     .stack_dummy (NOLOAD):
     {
         . = ALIGN(8);
+        _sstack = .;
         __StackLimit = .;
         /* Main stack */
         KEEP(*(.stack))
@@ -637,6 +646,7 @@ SECTIONS
         /* Thread stacks */
         KEEP(*(.stack*))
         __StackTopAll = .;
+        _estack = .;
     } > RAM
 
     PROVIDE(__stack = __StackTopAll);
@@ -701,10 +711,6 @@ SECTIONS
         . = ALIGN(32);
         __nocache_sdram_end = .;
     } > SDRAM
-
-
-    _gc_heap_start = ORIGIN(SDRAM);
-    _gc_heap_end = ORIGIN(SDRAM) + LENGTH(SDRAM);
 
     /* Main framebuffer memory */
     .fb_memory (NOLOAD) :
@@ -848,3 +854,12 @@ SECTIONS
     /* Symbol required for RA Configuration tool. */
     __tz_OPTION_SETTING_S_N = __OPTION_SETTING_S_End;
 }
+
+/* Define tho top end of the stack.  The stack is full descending so begins just
+   above last byte of RAM.  Note that EABI requires the stack to be 8-byte
+   aligned for a call. */
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+
+/* RAM extents for the garbage collector */
+_ram_start = ORIGIN(RAM);
+_ram_end = ORIGIN(RAM) + LENGTH(RAM);

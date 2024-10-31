@@ -25,7 +25,7 @@
 
 // Python internal features
 #define MICROPY_TRACKED_ALLOC               (MICROPY_SSL_MBEDTLS)
-#define MICROPY_READER_VFS                  (1)
+#define MICROPY_READER_VFS                  (0)
 #define MICROPY_ENABLE_GC                   (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
 #define MICROPY_LONGINT_IMPL                (MICROPY_LONGINT_IMPL_MPZ)
@@ -37,8 +37,7 @@
 #define MICROPY_PY_THREAD                   (1)
 #define MICROPY_PY_THREAD_GIL				(1)
 #define MICROPY_MODULE_FROZEN_MPY			(0)
-#define MICROPY_VFS                         (1)
-#define MICROPY_VFS_POSIX                   (0)
+#define MICROPY_PY_IO                       (1)
 #define MICROPY_QSTR_EXTRA_POOL             mp_qstr_frozen_const_pool
 
 // Control over Python builtins
@@ -47,6 +46,17 @@
 /* rbbbb*/
 #define MICROPY_HW_ENABLE_UART_REPLC		(0)
 #define MICROPY_HW_USB_CDC					(1)
+
+#define MICROPY_VFS                 (0)
+#define MICROPY_PY_IO               (1)
+#define MICROPY_PY_IO_FILEIO        (1)
+#define MICROPY_PY_MODUOS           (1)
+#define MICROPY_PY_MODUOS_FILE      (1)
+#define MICROPY_PY_SYS_STDFILES     (1)
+#define MICROPY_READER_POSIX        (1)
+#define MICROPY_PY_BUILTINS_COMPILE (1)
+#define MICROPY_PY_BUILTINS_EXECFILE (1)
+
 /* rbbbb*/
 
 // Extended modules

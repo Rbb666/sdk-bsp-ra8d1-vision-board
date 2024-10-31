@@ -160,7 +160,7 @@ static mp_obj_t py_lcd_clear(uint n_args, const mp_obj_t *args)
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_clear_obj, 0, 1, py_lcd_clear);
 
-static const mp_map_elem_t globals_dict_table[] =
+static const mp_rom_map_elem_t globals_dict_table[] =
 {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__),        MP_OBJ_NEW_QSTR(MP_QSTR_lcd) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_init), (mp_obj_t) &py_lcd_init_obj          },

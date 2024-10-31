@@ -12,9 +12,9 @@ extern const struct _mp_obj_module_t mp_module_collections;
 #undef MODULE_DEF_COLLECTIONS
 #define MODULE_DEF_COLLECTIONS { MP_ROM_QSTR(MP_QSTR_collections), MP_ROM_PTR(&mp_module_collections) },
 
-extern const struct _mp_obj_module_t display_module;
-#undef MODULE_DEF_DISPLAY
-#define MODULE_DEF_DISPLAY { MP_ROM_QSTR(MP_QSTR_display), MP_ROM_PTR(&display_module) },
+// extern const struct _mp_obj_module_t display_module;
+// #undef MODULE_DEF_DISPLAY
+// #define MODULE_DEF_DISPLAY { MP_ROM_QSTR(MP_QSTR_display), MP_ROM_PTR(&display_module) },
 
 extern const struct _mp_obj_module_t lcd_module;
 #undef MODULE_DEF_LCD
@@ -48,9 +48,13 @@ extern const struct _mp_obj_module_t ml_module;
 #undef MODULE_DEF_ML
 #define MODULE_DEF_ML { MP_ROM_QSTR(MP_QSTR_ml), MP_ROM_PTR(&ml_module) },
 
-extern const struct _mp_obj_module_t mp_module_os;
-#undef MODULE_DEF_OS
-#define MODULE_DEF_OS { MP_ROM_QSTR(MP_QSTR_os), MP_ROM_PTR(&mp_module_os) },
+// extern const struct _mp_obj_module_t mp_module_os;
+// #undef MODULE_DEF_OS
+// #define MODULE_DEF_OS { MP_ROM_QSTR(MP_QSTR_os), MP_ROM_PTR(&mp_module_os) },
+extern const struct _mp_obj_module_t mp_module_uos;
+#undef MODULE_DEF_UOS
+#define MODULE_DEF_UOS { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_uos) },
+#define mp_import_stat(x)   mp_posix_import_stat(x)
 
 extern const struct _mp_obj_module_t mp_module_platform;
 #undef MODULE_DEF_PLATFORM
@@ -176,7 +180,6 @@ extern const struct _mp_obj_module_t ulab_user_cmodule;
     MODULE_DEF_ARRAY \
     MODULE_DEF_BINASCII \
     MODULE_DEF_COLLECTIONS \
-    MODULE_DEF_DISPLAY \
 	MODULE_DEF_LCD	\
     MODULE_DEF_ERRNO \
     MODULE_DEF_HASHLIB \
@@ -185,7 +188,7 @@ extern const struct _mp_obj_module_t ulab_user_cmodule;
     MODULE_DEF_JSON \
     MODULE_DEF_MACHINE \
     MODULE_DEF_ML \
-    MODULE_DEF_OS \
+    MODULE_DEF_UOS \
     MODULE_DEF_PLATFORM \
     MODULE_DEF_RANDOM \
     MODULE_DEF_RE \

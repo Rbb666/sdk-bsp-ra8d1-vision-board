@@ -255,16 +255,25 @@ static const mp_stream_p_t fileio_stream_p = {
     .ioctl = fdfile_ioctl,
 };
 
-const mp_obj_type_t mp_type_fileio = {
-    { &mp_type_type },
-    .name = MP_QSTR_FileIO,
-    .print = fdfile_print,
-    .make_new = fdfile_make_new,
-    .getiter = mp_identity_getiter,
-    .iternext = mp_stream_unbuffered_iter,
-    .protocol = &fileio_stream_p,
-    .locals_dict = (mp_obj_dict_t*)&rawfile_locals_dict,
-};
+// const mp_obj_type_t mp_type_fileio = {
+//     { &mp_type_type },
+//     .name = MP_QSTR_FileIO,
+//     .print = fdfile_print,
+//     .make_new = fdfile_make_new,
+//     .getiter = mp_identity_getiter,
+//     .iternext = mp_stream_unbuffered_iter,
+//     .protocol = &fileio_stream_p,
+//     .locals_dict = (mp_obj_dict_t*)&rawfile_locals_dict,
+// };
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_type_fileio,
+    MP_QSTR_FileIO,
+    MP_TYPE_FLAG_ITER_IS_STREAM,
+    print, fdfile_print,
+    protocol, &fileio_stream_p,
+    locals_dict, &rawfile_locals_dict
+    );
 #endif
 
 static const mp_stream_p_t textio_stream_p = {
@@ -276,7 +285,7 @@ static const mp_stream_p_t textio_stream_p = {
 
 MP_DEFINE_CONST_OBJ_TYPE(
     mp_type_textio,
-    MP_QSTR_FileIO,
+    MP_QSTR_TextIOWrapper,
     MP_TYPE_FLAG_ITER_IS_STREAM,
     print, fdfile_print,
     protocol, &textio_stream_p,
@@ -284,12 +293,12 @@ MP_DEFINE_CONST_OBJ_TYPE(
     );
 
 // Factory function for I/O stream classes
-// mp_obj_t mp_builtin_open(size_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
-//     // TODO: analyze buffering args and instantiate appropriate type
-//     mp_arg_val_t arg_vals[FILE_OPEN_NUM_ARGS];
-//     mp_arg_parse_all(n_args, args, kwargs, FILE_OPEN_NUM_ARGS, file_open_args, arg_vals);
-//     return fdfile_open(&mp_type_textio, arg_vals);
-// }
-// MP_DEFINE_CONST_FUN_OBJ_KW(mp_builtin_open_obj, 1, mp_builtin_open);
+mp_obj_t mp_builtin_open(size_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
+    // TODO: analyze buffering args and instantiate appropriate type
+    mp_arg_val_t arg_vals[FILE_OPEN_NUM_ARGS];
+    mp_arg_parse_all(n_args, args, kwargs, FILE_OPEN_NUM_ARGS, file_open_args, arg_vals);
+    return fdfile_open(&mp_type_textio, arg_vals);
+}
+MP_DEFINE_CONST_FUN_OBJ_KW(mp_builtin_open_obj, 1, mp_builtin_open);
 
 #endif // MICROPY_PY_IO

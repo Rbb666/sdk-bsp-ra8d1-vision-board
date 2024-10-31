@@ -110,9 +110,9 @@ CPPFLAGS += '-DTF_LITE_DISABLE_X86_NEON'
 CPPFLAGS += '-DKERNELS_OPTIMIZED_FOR_SPEED'
 CPPFLAGS += '-DTF_LITE_STRIP_ERROR_STRINGS'
 
-CFLAGS = ' -DOMV_DEBUG_PRINTF'
-CFLAGS += ' -DFB_ALLOC_STATS'
-CFLAGS += ' -DOMV_PROFILE_ENABLE=1'
+# CFLAGS = ' -DOMV_DEBUG_PRINTF'
+# CFLAGS += ' -DFB_ALLOC_STATS'
+# CFLAGS += ' -DOMV_PROFILE_ENABLE=1'
 
 rtconfig.CXXFLAGS.replace('-std=gnu99', "")
 
@@ -137,7 +137,7 @@ group = group + DefineGroup('openmv/tf', tf_src, depend = ['BSP_USING_OPENMV', '
 group = group + DefineGroup('openmv/imlib', imlib_src, depend = ['BSP_USING_OPENMV'],
                             LOCAL_CCFLAGS = LOCAL_CCFLAGS,
                             CPPPATH = path,
-                            CFLAGS = CFLAGS,
+                            # CFLAGS = CFLAGS,
                             CXXFLAGS = CPPFLAGS,
                             LIBS = LIBS,
                             LIBPATH = LIBPATH)

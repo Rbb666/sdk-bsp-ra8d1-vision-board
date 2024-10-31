@@ -332,7 +332,6 @@ int framebuffer_set_buffers(int32_t n_buffers) {
     framebuffer->pixfmt = PIXFORMAT_INVALID;
 
     framebuffer_flush_buffers(true);
-
     return 0;
 }
 
@@ -351,6 +350,7 @@ static uint32_t framebuffer_total_buffer_size() {
 
 void framebuffer_free_current_buffer() {
     vbuffer_t *buffer = framebuffer_get_buffer(framebuffer->head);
+
     #ifdef __DCACHE_PRESENT
     // Make sure all cached CPU writes are discarded before returning the buffer.
     SCB_InvalidateDCache_by_Addr(buffer->data, framebuffer_get_buffer_size());
@@ -409,7 +409,16 @@ vbuffer_t *framebuffer_get_head(framebuffer_flags_t flags) {
         framebuffer->head = new_head;
     }
 
-    return framebuffer_get_buffer(new_head);
+    vbuffer_t *buffer = framebuffer_get_buffer(new_head);
+
+    #ifdef __DCACHE_PRESENT
+    if (flags & FB_INVALIDATE) {
+        // Make sure any cached CPU reads are dropped before returning the buffer.
+        SCB_InvalidateDCache_by_Addr(buffer->data, framebuffer_get_buffer_size());
+    }
+    #endif
+
+    return buffer;
 }
 
 vbuffer_t *framebuffer_get_tail(framebuffer_flags_t flags) {
